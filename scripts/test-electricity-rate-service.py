@@ -69,7 +69,10 @@ def main() -> None:
     html = (ROOT / "web/static/index.html").read_text(encoding="utf-8")
     app = (ROOT / "web/static/app.js").read_text(encoding="utf-8")
     assert 'id="energy-estimator-panel"' in html
-    assert "This estimates graphics-card electricity only" in html
+    assert "Automatic readings cover only the labeled GPU or CPU components" in html
+    assert 'id="energy-measurement-profile"' not in html
+    assert "rx7800xt-qwen35-9b" not in html and "ENERGY_MEASUREMENT_PROFILES" not in app
+    assert 'id="energy-use-measured"' in html
     assert "Use the price from my electricity bill · most accurate" in html
     assert "Use an average U.S. household price" in html
     assert "Use an average European household price" in html

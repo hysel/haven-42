@@ -147,7 +147,6 @@
       <button class="nav-item hidden" id="image-nav" type="button" aria-hidden="true" tabindex="-1"><span aria-hidden="true">◫</span>Images</button>
       <button class="nav-item" id="models-nav" type="button"><svg class="nav-icon" aria-hidden="true" viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/></svg>Models</button>
       <button class="nav-item" id="system-nav" type="button"><svg class="nav-icon" aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg>System</button>
-      <button class="nav-item" id="assurance-nav" type="button"><svg class="nav-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg><span class="nav-copy"><span class="nav-label">Technical details</span><small class="nav-tag">Advanced</small></span></button>
       <button class="nav-item" id="about-nav" type="button"><svg class="nav-icon" aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7h.01"/></svg>About</button>
       <button class="nav-item" id="close-app-nav" type="button"><svg class="nav-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 2v10M5.6 5.6a9 9 0 1 0 12.8 0"/></svg>Close Haven 42</button>
       <div class="rail-note">
@@ -166,8 +165,34 @@
               <span class="sr-only" id="capability-eyebrow">CONVERSATION</span>
               <h1 id="capability-title" tabindex="-1">Private conversation</h1>
               <div class="conversation-model-summary" aria-label="Current conversation model">
-                <output id="current-model-name">No model selected</output>
-                <span class="badge model-mode-badge" id="model-selection-mode">Automatic</span>
+                <output id="current-model-name" class="sr-only" aria-hidden="true">No model selected</output>
+                <div class="model-picker chat-model-picker">
+                  <div class="model-picker-heading sr-only">
+                    <label id="model-label" for="model">Conversation model</label>
+                  </div>
+                  <div class="model-select">
+                    <select id="model" aria-describedby="model-state" hidden disabled>
+                      <option>Connect Ollama first</option>
+                    </select>
+                    <button id="chat-model-trigger" class="button secondary chat-model-trigger" type="button" popovertarget="chat-model-popover" aria-haspopup="dialog" aria-expanded="false" disabled>
+                      <span id="chat-model-name">No model selected</span>
+                      <span class="badge model-mode-badge" id="model-selection-mode">Automatic</span>
+                      <span aria-hidden="true">▾</span>
+                    </button>
+                    <div id="chat-model-popover" class="chat-model-popover" popover role="dialog" aria-labelledby="chat-model-picker-title">
+                      <h2 id="chat-model-picker-title">Choose a conversation model</h2>
+                      <label for="chat-model-search">Find a model</label>
+                      <input id="chat-model-search" type="search" maxlength="64" placeholder="Search installed and recommended models" autocomplete="off">
+                      <p id="chat-model-result-count" class="field-help" role="status"></p>
+                      <div id="chat-model-results"></div>
+                      <p class="field-help">Check sizes sends model names to Ollama's public catalog and caches public size metadata in Haven42-Data. No model files are downloaded.</p>
+                      <button id="chat-model-size-check" class="button secondary" type="button">Check sizes online / retry</button>
+                      <p id="chat-model-size-status" class="field-help" role="status"></p>
+                      <button id="chat-model-browse" class="button secondary" type="button">Search the public catalog</button>
+                    </div>
+                    <small id="model-state" class="sr-only">Automatic selection unavailable</small>
+                  </div>
+                </div>
               </div>
             </div>
             <div class="panel-heading-actions">
@@ -214,17 +239,8 @@
                     </select>
                     <small id="text-mode-status">Haven 42 chooses from your request</small>
                   </div>
-                  <div class="model-picker">
-                    <div class="model-picker-heading">
-                      <label id="model-label" for="model">Conversation model</label>
-                      <button class="button text-button model-library-link" id="open-models-from-chat" type="button">Browse models <span aria-hidden="true">→</span></button>
-                    </div>
-                    <div class="model-select">
-                      <select id="model" aria-describedby="model-state" disabled>
-                        <option>Connect Ollama first</option>
-                      </select>
-                      <small id="model-state">Automatic selection unavailable</small>
-                    </div>
+                  <div class="model-picker-heading">
+                    <button class="button text-button model-library-link" id="open-models-from-chat" type="button">Browse models <span aria-hidden="true">→</span></button>
                   </div>
                   <button class="button text-button hidden" id="reset-model-button" type="button">Use automatic</button>
                   <div class="session-view-controls">
@@ -335,27 +351,6 @@
             </div>
           </section>
 
-          <section class="model-switch-prompt hidden" id="answer-report-panel" role="dialog" aria-labelledby="answer-report-title" aria-describedby="answer-report-description">
-            <div class="answer-report-fields">
-              <strong id="answer-report-title">Report this answer</strong>
-              <p id="answer-report-description">This creates a private file in Haven42-Logs. It includes the model, task type, software versions, category, and your optional note. It never includes the question, answer, or attachments, and nothing is uploaded.</p>
-              <label for="answer-report-category">What went wrong?</label>
-              <select id="answer-report-category">
-                <option value="incorrect">The answer was incorrect</option>
-                <option value="unsafe">The answer seemed unsafe</option>
-                <option value="unclear">The answer was unclear</option>
-                <option value="formatting">The formatting was difficult to use</option>
-                <option value="other">Something else</option>
-              </select>
-              <label for="answer-report-note">Optional note <small>Do not include private chat content or personal information.</small></label>
-              <textarea id="answer-report-note" maxlength="300" rows="3" placeholder="Describe the problem without copying the question or answer."></textarea>
-              <p class="field-help" id="answer-report-status" role="status"></p>
-            </div>
-            <div class="model-switch-actions">
-              <button class="button secondary" id="cancel-answer-report" type="button">Cancel</button>
-              <button class="button primary" id="save-answer-report" type="button">Save private report</button>
-            </div>
-          </section>
 
           <form class="composer-surface composer" id="text-form">
             <section class="context-panel" aria-label="Attachments">
@@ -381,7 +376,7 @@
               <ul class="context-files hidden" id="context-file-list" aria-label="Selected context files"></ul>
               <ul class="context-images hidden" id="context-image-list" aria-label="Selected screenshots"></ul>
               <p class="context-warning hidden" id="context-network-warning" role="note">Your attached files will be sent to the Ollama server you connected. Only continue if you trust that server.</p>
-              <p class="context-warning hidden" id="context-image-warning" role="note">Haven 42 has not confirmed that the selected model can understand screenshots. If it cannot, the message will safely stop and your input will remain available.</p>
+              <p class="field-help hidden" id="context-image-warning" role="note">Screenshots are sent to the selected model. Image support is checked when you send; if the request fails, your message and attachments stay here.</p>
             </section>
 
             <label class="sr-only" id="prompt-label" for="prompt">Message</label>
@@ -505,6 +500,9 @@
               </form>
               <div class="model-search-status" id="model-search-status" role="status" aria-live="polite">Installed models will appear here after connection.</div>
               <div class="model-search-results" id="model-search-results"></div>
+              <p class="field-help">Sizes for listed models are included with Haven 42. Public search automatically retrieves sizes for additional models and caches them in Haven42-Data. Cached sizes expire after seven days. Search text is not saved. Check sizes refreshes metadata without downloading models. Catalog sizes are approximate; some tags do not publish a size.</p>
+              <button id="model-size-check" class="button secondary" type="button">Check sizes online / retry</button>
+              <p id="model-size-status" class="field-help" role="status"></p>
             <article class="desired-model hidden" id="desired-model" aria-live="polite" tabindex="-1">
                 <strong id="desired-model-name"></strong>
                 <span id="desired-model-state"></span>
@@ -584,33 +582,6 @@
           <div class="system-workspace" id="system-workspace-content"></div>
         </section>
 
-        <section class="panel chat-panel hidden" id="assurance-panel" aria-labelledby="assurance-title">
-          <div class="panel-heading">
-            <div>
-              <p class="eyebrow">ADVANCED · TEST INFORMATION</p>
-              <h2 id="assurance-title" tabindex="-1">Technical test details</h2>
-            </div>
-            <div class="panel-heading-actions">
-              <span class="badge" id="assurance-badge">Loading</span>
-              <button class="button text-button section-tour-help" type="button" data-tour-section="technical" aria-label="Show help for Technical details">? Help</button>
-            </div>
-          </div>
-          <div class="workflow-planner assurance-workspace">
-            <p>This optional page is for advanced users and contributors. It summarizes which features and computer setups have been tested.</p>
-            <dl class="status-list">
-              <div><dt>Evidence records</dt><dd id="assurance-record-count">Checking…</dd></div>
-              <div><dt>Models represented</dt><dd id="assurance-model-count">Checking…</dd></div>
-              <div><dt>Agent surfaces</dt><dd id="assurance-surface-count">Checking…</dd></div>
-              <div><dt>Live validation</dt><dd id="assurance-live-status">Not run by this view</dd></div>
-            </dl>
-            <h3>Evidence outcomes</h3>
-            <div class="assurance-status-list" id="assurance-status-list" aria-live="polite"></div>
-            <h3>Agent surface readiness</h3>
-            <div class="assurance-list" id="assurance-surface-list" aria-live="polite"></div>
-            <p class="field-help">This page shows test records included with Haven 42. Opening it does not start AI, read your files, contact a server, or change your computer. These results do not mean this Alpha is ready for general use.</p>
-            <a class="button secondary assurance-wiki-link" href="https://github.com/hysel/haven-42/wiki/Model-And-Hardware-Test-Status" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer">Open model and hardware test status</a>
-          </div>
-        </section>
 
         <aside class="configuration-column" aria-label="Current AI and system status">
           <section class="status-glance" aria-labelledby="status-glance-title">
@@ -635,7 +606,7 @@
                 <span><strong>Energy</strong><output id="status-energy-kwh">—</output></span>
                 <span><strong>Price</strong><output id="status-energy-cost">—</output></span>
               </div>
-              <small id="status-energy-period">GPU only · current session</small>
+              <small id="status-energy-period">Entered measurement · current session</small>
             </div>
             <button class="button text-button status-glance-link" id="view-system-details" type="button">View system details →</button>
           </section>
@@ -824,22 +795,20 @@
             <div class="panel-heading">
               <div>
                 <p class="eyebrow">ELECTRICITY ESTIMATE</p>
-                <h2 id="energy-estimator-title" tabindex="-1">Estimate graphics-card cost</h2>
+                <h2 id="energy-estimator-title" tabindex="-1">Estimate electricity cost</h2>
               </div>
               <span class="badge">Estimate only</span>
             </div>
-            <p>Use a measured graphics-card average and the price from your electricity bill. Haven 42 does not detect your location or change your model choice.</p>
+            <p>Use available power readings from this computer or enter your own measured average, along with the price from your electricity bill. Haven 42 does not detect your location or change your model choice.</p>
             <form id="energy-estimator-form">
-              <label for="energy-measurement-profile">Graphics-card measurement</label>
-              <select id="energy-measurement-profile" aria-describedby="energy-measurement-help">
-                <option value="manual" selected>Enter my measured average</option>
-                <option value="rx7800xt-qwen35-9b">RX 7800 XT · Qwen 3.5 9B · exact Haven 42 test</option>
-              </select>
-              <p class="field-help" id="energy-measurement-help">A Haven 42 test profile applies only to the exact card, model, runtime, and workload shown.</p>
+              <p class="field-help" id="energy-measurement-help">Power measurement unavailable. You can enter your own measured average below.</p>
+              <p class="field-help hidden" id="energy-live-power"></p>
+              <button class="button secondary hidden" id="energy-use-measured" type="button">Use measured average</button>
+              <p class="field-help" id="energy-watts-source">Manual entry: use a measured average, not the hardware's advertised maximum power.</p>
 
               <div class="advanced-grid energy-number-grid">
-                <label for="energy-average-watts">Average GPU watts
-                  <input id="energy-average-watts" inputmode="decimal" type="number" min="0.001" max="2000" step="0.001" placeholder="For example: 40.084" required>
+                <label for="energy-average-watts">Average watts
+                  <input id="energy-average-watts" inputmode="decimal" type="number" min="0" max="2000" step="0.001" placeholder="Enter measured watts" aria-describedby="energy-watts-source" required>
                 </label>
                 <label for="energy-hours-per-day">Hours used per day
                   <input id="energy-hours-per-day" inputmode="decimal" type="number" min="0" max="24" step="0.25" value="2" required>
@@ -964,7 +933,7 @@
               <span id="energy-estimate-usage"></span>
               <small id="energy-estimate-source"></small>
             </article>
-            <p class="notice energy-estimate-warning" role="note">This estimates graphics-card electricity only. It excludes the CPU, memory, storage, cooling, display, and power-supply losses, so it is not a prediction of your utility bill.</p>
+            <p class="notice energy-estimate-warning" role="note">Automatic readings cover only the labeled GPU or CPU components on this computer, not whole-computer power or a remote AI server. They include other activity on those components, not just Haven 42. For a whole-computer estimate, enter a wall-meter average. This is not a prediction of your utility bill.</p>
           </section>
 
         </aside>

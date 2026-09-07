@@ -846,6 +846,116 @@ def _gpu_sample() -> dict[str, int | float | None]:
     return _windows_pdh_gpu_sample()
 
 
+def _power_number(value: str) -> float | None:
+    try:
+        watts = float(value)
+    except (ValueError, TypeError):
+        return None
+    return watts if math.isfinite(watts) and 0 <= watts <= 2000 else None
+
+
+def _nvidia_power_sample() -> dict[str, Any] | None:
+    """Read board power only; never substitute utilization or the power limit."""
+    executable = shutil.which("nvidia-smi")
+    if not executable:
+        return None
+    try:
+        result = subprocess.run(
+            [executable, "--query-gpu=power.draw", "--format=csv,noheader,nounits"],
+            stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+            shell=False, timeout=2, check=False,
+            creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0) if os.name == "nt" else 0,
+        )
+        if result.returncode or len(result.stdout) > 4096:
+            return None
+        rows = result.stdout.decode("ascii").splitlines()
+        if not 1 <= len(rows) <= 16:
+            return None
+        values = [_power_number(row.strip()) for row in rows]
+        if any(value is None for value in values):
+            return None  # Do not present a partial multi-GPU reading as a total.
+        watts = _power_number(str(sum(values)))
+        if watts is not None:
+            return {"scope": "nvidia-gpus", "source": "nvidia-smi", "watts": watts}
+    except (OSError, UnicodeError, subprocess.TimeoutExpired):
+        pass
+    return None
+
+
+_POWER_LOCK = threading.Lock()
+_CPU_ENERGY_PREVIOUS: dict[str, tuple[float, int, int]] = {}
+
+
+def _sensor_text(path: Path) -> str:
+    with path.open("r", encoding="ascii") as stream:
+        return stream.read(128).strip()
+
+
+def _linux_power_sample(
+    hwmon: Path = Path("/sys/class/hwmon"),
+    powercap: Path = Path("/sys/class/powercap"),
+) -> dict[str, Any] | None:
+    """Read existing sensors without changing permissions or starting helpers."""
+    try:
+        devices = list(hwmon.glob("hwmon*"))[:64]
+        gpu_values = []
+        for device in devices:
+            if _sensor_text(device / "name") != "amdgpu":
+                continue
+            sensor = device / "power1_average"
+            if not sensor.exists():
+                sensor = device / "power1_input"
+            value = _power_number(str(int(_sensor_text(sensor)) / 1_000_000))
+            if value is None:
+                raise ValueError("invalid-power-sensor")
+            gpu_values.append(value)
+        if gpu_values:
+            watts = _power_number(str(sum(gpu_values)))
+            if watts is not None:
+                return {"scope": "amd-gpus", "source": "linux-hwmon", "watts": watts}
+    except (OSError, ValueError, UnicodeError):
+        pass
+    # Only package zones, not their nested core/graphics subzones (double counting).
+    current = {}
+    now = time.monotonic()
+    try:
+        for zone in list(powercap.glob("intel-rapl:*"))[:64]:
+            if not re.fullmatch(r"intel-rapl:\d+", zone.name):
+                continue
+            if not re.fullmatch(r"package-\d+", _sensor_text(zone / "name")):
+                continue
+            energy = int(_sensor_text(zone / "energy_uj"))
+            maximum = int(_sensor_text(zone / "max_energy_range_uj"))
+            if not 0 <= energy < maximum:
+                raise ValueError("invalid-energy-counter")
+            current[str(zone)] = (now, energy, maximum)
+    except (OSError, ValueError, UnicodeError):
+        current = {}
+    with _POWER_LOCK:
+        previous = dict(_CPU_ENERGY_PREVIOUS)
+        _CPU_ENERGY_PREVIOUS.clear()
+        _CPU_ENERGY_PREVIOUS.update(current)
+    if not current or current.keys() != previous.keys():
+        return None
+    watts = 0.0
+    for key, (stamp, energy, maximum) in current.items():
+        old_stamp, old_energy, old_maximum = previous[key]
+        elapsed = stamp - old_stamp
+        if not 0.05 <= elapsed <= 30 or maximum != old_maximum:
+            return None
+        watts += ((energy - old_energy) % maximum) / 1_000_000 / elapsed
+    watts = _power_number(str(watts))
+    return ({"scope": "cpu-packages", "source": "linux-rapl", "watts": watts}
+            if watts is not None else None)
+
+
+def sample_power() -> dict[str, Any] | None:
+    value = _nvidia_power_sample()
+    if value is None and sys.platform.startswith("linux"):
+        value = _linux_power_sample()
+    return value
+
+
 def sample_resources() -> dict[str, Any]:
     sample = {
         "schemaVersion": 1,
@@ -854,6 +964,7 @@ def sample_resources() -> dict[str, Any]:
         "systemCpuPercent": _windows_cpu_sample(),
         **_windows_memory_sample(),
         **_gpu_sample(),
+        "power": sample_power(),
         "ollamaLoadedModelBytes": None,
         "ollamaLoadedVramBytes": None,
         "externalTelemetryUsed": False,

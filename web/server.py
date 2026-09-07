@@ -89,6 +89,9 @@ from provider_security import (  # noqa: E402
     validate_provider_authentication,
 )
 from model_catalog_search import (  # noqa: E402
+    ModelSizeCache,
+    load_bundled_model_sizes,
+    lookup_ollama_model_size,
     MAX_RESULTS as MAX_MODEL_SEARCH_RESULTS,
     ModelCatalogSearchError,
     search_ollama_catalog,
@@ -1219,6 +1222,28 @@ def _provider_json(
     return read_json(request, timeout, maximum_bytes)
 
 
+def provider_image_support(
+    base_url: str, model: str, timeout: int,
+    authentication: ProviderAuthentication = NO_PROVIDER_AUTHENTICATION,
+) -> str:
+    """Query runtime capability, never infer vision from a name or test catalog."""
+    try:
+        details = _provider_json(
+            base_url, "/api/show", min(timeout, 10), {"model": model},
+            authentication=authentication,
+        )
+    except (OSError, ProviderSecurityError):
+        return "unknown"
+    capabilities = details.get("capabilities")
+    if (
+        not isinstance(capabilities, list) or not capabilities
+        or len(capabilities) > 64
+        or any(not isinstance(item, str) or len(item) > 64 for item in capabilities)
+    ):
+        return "unknown"
+    return "supported" if "vision" in capabilities else "unsupported"
+
+
 def model_download_failure_code(error: BaseException) -> str:
     """Classify failures without persisting provider text, paths or credentials."""
     if isinstance(error, urllib.error.URLError) and isinstance(error.reason, BaseException):
@@ -1387,6 +1412,7 @@ class HavenState:
         software_update_provider: Callable[[], dict[str, Any]] = check_managed_software_updates,
         diagnostic_root: Path | None = None,
         managed_setup_state_root: Path | None = None,
+        model_metadata_cache_root: Path | None = None,
     ) -> None:
         self.csrf_token = secrets.token_urlsafe(32)
         self.lock = threading.RLock()
@@ -1398,6 +1424,10 @@ class HavenState:
         self.models: tuple[str, ...] = ()
         self.model_digests: dict[str, str] = {}
         self.model_sizes: dict[str, int] = {}
+        self.model_size_cache = ModelSizeCache(model_metadata_cache_root)
+        self.bundled_model_sizes = load_bundled_model_sizes(ROOT / "config/model-size-catalog.json")
+        self.model_size_lookup = lookup_ollama_model_size
+        self.model_metadata_lock = threading.Lock()
         self.managed_model_selection: dict[str, Any] | None = None
         self.ollama_version: str | None = None
         self.used_models: set[tuple[str, str, int, ProviderAuthentication]] = set()
@@ -2170,6 +2200,40 @@ class HavenState:
             raise WebRequestError("assurance-evidence-invalid", HTTPStatus.SERVICE_UNAVAILABLE)
         return result
 
+    def model_metadata(self, names, online):
+        if (type(online) is not bool or not isinstance(names, list)
+                or len(names) > (8 if online else 128)
+                or any(not isinstance(name, str) or not MODEL_NAME.fullmatch(name) for name in names)):
+            raise WebRequestError("invalid-model-metadata-fields")
+        if not self.model_metadata_lock.acquire(blocking=False):
+            raise WebRequestError("model-metadata-busy", HTTPStatus.CONFLICT)
+        try:
+            with self.lock:
+                installed = dict(self.model_sizes)
+            sizes = {name: installed.get(name) or self.model_size_cache.get(name)
+                     or (self.bundled_model_sizes.get(name) if not online else None) for name in names}
+            missing = list(dict.fromkeys(name for name in names if sizes[name] is None))
+            fresh = {}
+            if online and missing:
+                from concurrent.futures import ThreadPoolExecutor
+                def lookup(name):
+                    try:
+                        size = self.model_size_lookup(name)
+                        return size if type(size) is int and 0 < size <= 16 * 1024 ** 4 else None
+                    except (OSError, ValueError):
+                        return None
+                with ThreadPoolExecutor(max_workers=4) as pool:
+                    fresh = {name: size for name, size in zip(missing, pool.map(lookup, missing)) if size is not None}
+                sizes.update(fresh)
+            # A failed refresh must not erase the bundled offline estimate.
+            sizes = {name: size or self.bundled_model_sizes.get(name) for name, size in sizes.items()}
+            saved = self.model_size_cache.update(fresh) if fresh else None
+            return {"sizes": {name: {"bytes": size, "source": "ollama-installed" if name in installed else "ollama-catalog"}
+                              for name, size in sizes.items() if size is not None},
+                    "unavailable": [name for name in names if sizes[name] is None], "cacheSaved": saved}
+        finally:
+            self.model_metadata_lock.release()
+
     def search_models(self, query: object, online: object) -> dict[str, Any]:
         try:
             normalized_query = validate_query(query)
@@ -2207,8 +2271,9 @@ class HavenState:
             seen.add(value)
             is_installed = value in installed
             fit = assess_model_download_fit(value, snapshot, trust_scope)
-            size = installed_sizes.get(value) if is_installed else getattr(discovered, "sizes", {}).get(value)
-            size_metadata = ({"modelSize": {"bytes": size, "source": "ollama-installed" if is_installed else "ollama-catalog"}}
+            size = (installed_sizes.get(value) or getattr(discovered, "sizes", {}).get(value)
+                    or self.model_size_cache.get(value) or self.bundled_model_sizes.get(value))
+            size_metadata = ({"modelSize": {"bytes": size, "source": "ollama-installed" if value in installed_sizes else "ollama-catalog"}}
                              if type(size) is int and 0 < size <= 16 * 1024 ** 4 else {})
             results.append({
                 "name": value,
@@ -2222,6 +2287,7 @@ class HavenState:
                 "executionAllowed": is_installed,
                 "installCommand": None if is_installed else f"ollama pull {value}",
             })
+        self.model_size_cache.update({name: getattr(discovered, "sizes", {}).get(name) for name in seen})
         with self.lock:
             # Only the most recent reviewed search may authorize an install.
             # This prevents a candidate discovered against an earlier catalog
@@ -3574,9 +3640,18 @@ class HavenState:
 
         effective_request_id = request_id or uuid.uuid4().hex
         cancel_event = self._open_text_request(effective_request_id)
+        image_support = "not-requested"
         self.diagnostics.record("text", "TEXT_GENERATION_STARTED", "started")
         try:
             with self.operation_lock:
+                if clean_images:
+                    image_support = provider_image_support(
+                        base_url, model, timeout_seconds, authentication,
+                    )
+                    if image_support == "unsupported":
+                        raise WebRequestError("model-images-unsupported", HTTPStatus.CONFLICT)
+                    if cancel_event.is_set():
+                        raise WebRequestError("text-request-cancelled", HTTPStatus.CONFLICT)
                 self._cancel_idle_timer()
                 with self.lock:
                     previous = self.active_model
@@ -3640,7 +3715,10 @@ class HavenState:
                 except (OSError, ProviderSecurityError) as error:
                     self.unload_active_model()
                     self.diagnostics.record("text", "TEXT_GENERATION_FAILED", "failed")
-                    raise WebRequestError("ollama-chat-failed", HTTPStatus.BAD_GATEWAY) from error
+                    raise WebRequestError(
+                        "ollama-image-request-failed" if clean_images else "ollama-chat-failed",
+                        HTTPStatus.BAD_GATEWAY,
+                    ) from error
                 message = response.get("message")
                 content = message.get("content") if isinstance(message, dict) else None
                 if not isinstance(content, str) or not content.strip():
@@ -3759,7 +3837,7 @@ class HavenState:
                 "type": "warning",
                 "code": "MODEL_SELECTION_UNVERIFIED_FOR_CAPABILITY",
             })
-        if clean_images:
+        if clean_images and image_support == "unknown":
             events.append({
                 "sequence": len(events) + 1,
                 "type": "warning",
@@ -3818,7 +3896,10 @@ class HavenState:
                 "totalBytes": context_total_bytes,
                 "imageCount": len(clean_images),
                 "imageTotalBytes": context_image_total_bytes,
-                "imageInputEvidence": "unverified" if clean_images else "not-requested",
+                "imageInputEvidence": (
+                    "provider-reported-supported" if image_support == "supported"
+                    else "unverified" if clean_images else "not-requested"
+                ),
                 "providerTrustScope": trust_scope,
                 "persisted": False,
                 "temporaryFilesWritten": False,
@@ -4423,6 +4504,11 @@ class HavenRequestHandler(BaseHTTPRequestHandler):
                     self.server.state.search_models(body["query"], body["online"]),
                 )
                 return
+            if self.path == "/api/model-metadata":
+                if set(body) != {"models", "online"}:
+                    raise WebRequestError("invalid-model-metadata-fields")
+                self._send_json(HTTPStatus.OK, self.server.state.model_metadata(body["models"], body["online"]))
+                return
             if self.path == "/api/model-install/prepare":
                 if set(body) not in ({"model"}, {"model", "presentation"}) or not isinstance(body["model"], str):
                     raise WebRequestError("invalid-model-install-preparation-fields")
@@ -5017,7 +5103,8 @@ def main() -> int:
         if not args.no_open:
             open_browser_or_report(requested_url)
         return 0
-    state = HavenState()
+    from windows_user_paths import portable_data_root
+    state = HavenState(model_metadata_cache_root=portable_data_root())
     try:
         server = HavenWebServer((args.host, args.port), state)
     except OSError as error:

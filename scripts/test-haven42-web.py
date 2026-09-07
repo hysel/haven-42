@@ -65,6 +65,7 @@ def test_png(width: int, height: int) -> bytes:
 
 
 class FakeState:
+    image_capabilities = None
     models = ["qwen3.5:9b", "writer-model:latest", "bad model<script>"]
     loaded: set[str] = set()
     requests: list[tuple[str, dict]] = []
@@ -166,7 +167,9 @@ class FakeOllama(BaseHTTPRequestHandler):
         body = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
         FakeState.requests.append((self.path, body))
         model = str(body.get("model", ""))
-        if self.path == "/api/chat":
+        if self.path == "/api/show":
+            self._json(200, {"capabilities": FakeState.image_capabilities})
+        elif self.path == "/api/chat":
             FakeState.loaded.add(model)
             if FakeState.fail_chat:
                 self._json(500, {"error": "forced-chat-failure"})
@@ -278,6 +281,74 @@ def contrast_ratio(foreground: str, background: str) -> float:
 
 def main() -> int:
     checks = 0
+
+    with tempfile.TemporaryDirectory(prefix="haven42-model-metadata-") as temporary:
+        root = Path(temporary)
+        cache = WEB.ModelSizeCache(root)
+        assert cache.update({"example:q4": 86000000, "example:q8": 143000000, "new-model:tag": None, "bad name": 1, "boolean:tag": True})
+        assert WEB.ModelSizeCache(root).get("example:q4") == 86000000
+        assert cache.get("example:q8") == 143000000 and cache.get("example:other") is None
+        saved = json.loads((root / "model-size-cache.json").read_text())
+        assert set(saved) == {"schemaVersion", "models"}
+        assert set(saved["models"]) == {"example:q4", "example:q8", "new-model:tag"}
+        assert all(set(record) == {"bytes", "checkedAt"} for record in saved["models"].values())
+        cache.records["example:q4"]["checkedAt"] = 0
+        cache.update({"example:q4": None})
+        assert cache.get("example:q4") is None
+        cache.update({f"bounded:{index}": index + 1 for index in range(1100)})
+        assert len(cache.records) == cache.LIMIT and not list(root.glob(".model-size-*.tmp"))
+        (root / "model-size-cache.json").write_text("invalid json")
+        assert WEB.ModelSizeCache(root).get("example:q4") is None
+        blocked = root / "not-a-directory"
+        blocked.write_text("keep")
+        assert WEB.ModelSizeCache(blocked).update({"example:q4": 1}) is False
+        assert blocked.read_text() == "keep"
+    metadata_state = WEB.HavenState()
+    lookups = []
+    metadata_state.model_size_lookup = lambda name: lookups.append(name) or 100
+    assert metadata_state.model_metadata(["example:q4"], False)["unavailable"] == ["example:q4"] and not lookups
+    assert metadata_state.model_metadata(["example:q4"], True)["sizes"]["example:q4"]["bytes"] == 100
+    metadata_state.model_metadata(["example:q4"], True)
+    assert lookups == ["example:q4"]
+    assert not metadata_state.discovered_model_candidates and not metadata_state.pending_model_install_approvals
+    metadata_state.model_size_lookup = lambda name: (_ for _ in ()).throw(WEB.ModelCatalogSearchError("offline"))
+    assert metadata_state.model_metadata(["example:unknown"], True)["unavailable"] == ["example:unknown"]
+    metadata_state.model_sizes["example:q4"] = 200
+    assert metadata_state.model_metadata(["example:q4"], False)["sizes"]["example:q4"] == {"bytes": 200, "source": "ollama-installed"}
+    for names, online in [(["example:q4"] * 9, True), (["bad name"], True), ([], "yes")]:
+        try:
+            metadata_state.model_metadata(names, online)
+            raise AssertionError("invalid metadata request accepted")
+        except WEB.WebRequestError:
+            pass
+    with patch.dict(WEB.lookup_ollama_model_size.__globals__, {"_fetch_catalog_html": lambda *args: '<a href="/library/example:q4">86 MB</a><a href="/library/example:q8">143 MB</a>'}):
+        assert WEB.lookup_ollama_model_size("example:q4") == 86000000
+        assert WEB.lookup_ollama_model_size("example:unknown") is None
+    checks += 21
+
+    # Bundled metadata is offline display data, not installation permission.
+    bundled = WEB.load_bundled_model_sizes(ROOT / "config/model-size-catalog.json")
+    generator_spec = importlib.util.spec_from_file_location("size_generator", ROOT / "scripts/generate-model-size-catalog.py")
+    generator = importlib.util.module_from_spec(generator_spec)
+    generator_spec.loader.exec_module(generator)
+    catalog = json.loads((ROOT / "config/model-size-catalog.json").read_text())
+    assert set(generator.listed_models()) == set(bundled) | set(catalog["unavailable"])
+    assert bundled["qwen3.5:9b"] == 6600000000
+    state_sizes = WEB.HavenState()
+    state_sizes.model_size_lookup = lambda name: (_ for _ in ()).throw(AssertionError("offline lookup contacted network"))
+    assert state_sizes.model_metadata(["qwen3.5:9b"], False)["sizes"]["qwen3.5:9b"]["bytes"] == bundled["qwen3.5:9b"]
+    state_sizes.model_size_cache.update({"qwen3.5:9b": 7000000000})
+    assert state_sizes.model_metadata(["qwen3.5:9b"], False)["sizes"]["qwen3.5:9b"]["bytes"] == 7000000000
+    state_sizes.model_sizes["qwen3.5:9b"] = 7100000000
+    assert state_sizes.model_metadata(["qwen3.5:9b"], False)["sizes"]["qwen3.5:9b"] == {"bytes": 7100000000, "source": "ollama-installed"}
+    assert not state_sizes.discovered_model_candidates
+    # Actual search parser retrieves new exact-tag sizes; server caches them automatically.
+    with patch.dict(WEB.search_ollama_catalog.__globals__, {"_fetch_catalog_html": lambda *args: '<a href="/library/new-example:q4">86 MB</a>'}):
+        state_sizes.model_catalog_provider = WEB.search_ollama_catalog
+        result = state_sizes.search_models("new-example:q4", True)
+    assert result["results"][0]["modelSize"]["bytes"] == 86000000
+    assert state_sizes.model_size_cache.get("new-example:q4") == 86000000
+    checks += 8
 
     # Real download consumer: progress may exceed 8 MiB without retaining history.
     import provider_security as security
@@ -1899,6 +1970,8 @@ def main() -> int:
         saved_catalog_provider = state.model_catalog_provider
         state.model_catalog_provider = lambda query: sized
         sized_search = state.search_models("example", True)
+        assert state.model_size_cache.get("example:small") == 86000000
+        assert "example:unknown" in state.model_size_cache.records
         assert sized_search["results"][0]["modelSize"] == {"bytes": 86000000, "source": "ollama-catalog"}
         assert "modelSize" not in sized_search["results"][2]
         assert state.prepare_model_install("example:mlx")["modelSize"] == {"bytes": 1200000000, "source": "ollama-catalog"}
@@ -2798,6 +2871,46 @@ def main() -> int:
         screenshot_payload = [body for path, body in FakeState.requests if path == "/api/chat"][-1]
         assert screenshot_payload["messages"][-1]["images"] == [png_base64]
         assert screenshot_reply["events"][-2]["code"] == "MODEL_IMAGE_INPUT_UNVERIFIED"
+        image_request = {
+            "capabilityId": "general.chat", "model": "qwen3.5:9b",
+            "messages": [{"role": "user", "content": "Describe the screenshot."}],
+            "attachments": [], "images": [screenshot], "contextConsent": False,
+        }
+        try:
+            for metadata in (["completion", "vision"], ["completion"], None, [], "vision", [False]):
+                FakeState.image_capabilities = metadata
+                previous_chats = len([p for p, _ in FakeState.requests if p == "/api/chat"])
+                status, reply, _ = request_json(origin + "/api/text", "POST", image_request, token, origin)
+                if metadata == ["completion"]:
+                    assert status == 409 and reply["error"] == "model-images-unsupported"
+                    assert len([p for p, _ in FakeState.requests if p == "/api/chat"]) == previous_chats
+                else:
+                    assert status == 200
+                    expected = "provider-reported-supported" if metadata == ["completion", "vision"] else "unverified"
+                    assert reply["context"]["imageInputEvidence"] == expected
+                    assert any(e["code"] == "MODEL_IMAGE_INPUT_UNVERIFIED" for e in reply["events"]) == (expected == "unverified")
+                checks += 1
+            FakeState.image_capabilities = ["completion"]
+            status, _, _ = request_json(origin + "/api/text", "POST", {**image_request, "images": []}, token, origin)
+            assert status == 200  # Text does not require vision.
+            with patch.object(WEB, "_provider_json", side_effect=OSError("metadata unavailable")):
+                assert WEB.provider_image_support("http://127.0.0.1", "example", 30) == "unknown"
+            checks += 2
+            # Capability follows the exact selected model, not catalog membership
+            # or a cached answer for the previously selected model.
+            with patch.object(WEB, "_provider_json", side_effect=[
+                {"capabilities": ["completion", "vision"]},
+                {"capabilities": ["completion"]},
+            ]) as show:
+                assert WEB.provider_image_support("http://127.0.0.1", "uncatalogued-vision:test", 30) == "supported"
+                assert WEB.provider_image_support("http://127.0.0.1", "uncatalogued-text:test", 30) == "unsupported"
+                assert [call.args for call in show.call_args_list] == [
+                    ("http://127.0.0.1", "/api/show", 10, {"model": "uncatalogued-vision:test"}),
+                    ("http://127.0.0.1", "/api/show", 10, {"model": "uncatalogued-text:test"}),
+                ]
+            checks += 3
+        finally:
+            FakeState.image_capabilities = None
         four_screenshots = [
             {**screenshot, "name": f"clipboard-screenshot-{index}.png"}
             for index in range(1, WEB.MAX_CONTEXT_IMAGES + 1)
@@ -3241,7 +3354,7 @@ def main() -> int:
         assert policy["documentContext"]["maximumBytesPerScreenshot"] == 4194304
         assert policy["documentContext"]["maximumScreenshotTotalPixels"] == 33554432
         assert policy["documentContext"]["maximumScreenshotDimension"] == 4096
-        assert policy["documentContext"]["imageInputEvidence"] == "unverified-visible-warning"
+        assert policy["documentContext"]["imageInputEvidence"] == "provider-capability-not-certification"
         assert policy["documentContext"]["screenshotFilePickerAllowed"] is True
         assert policy["documentContext"]["memoryOnly"] is True
         assert policy["documentContext"]["privateNetworkConfirmationRequired"] is True
@@ -3378,7 +3491,6 @@ def main() -> int:
         assert policy["executionEvents"]["unverifiedModelWarningRequired"] is True
         assert policy["browser"]["remoteAssetsAllowed"] is False
         assert policy["browser"]["fixedExternalNavigationUrls"] == [
-            "https://github.com/hysel/haven-42/wiki/Model-And-Hardware-Test-Status",
             "https://github.com/hysel/haven-42/issues/new?template=alpha-bug-report.yml",
             "https://github.com/ollama/ollama/releases",
             "https://ollama.com/download/windows",
@@ -3405,7 +3517,7 @@ def main() -> int:
         assert "/api/text" in javascript and "content.summarize" in javascript
         assert "trust-scope" not in javascript and "modelSelections" in javascript
         assert "Automatic — no validated model installed" in javascript
-        assert "Advanced manual selection" in javascript
+        assert 'advanced.label = "Installed models"' in javascript
         assert "result.downloadsPerformed !== false" in javascript
         assert "/api/model-search" in javascript and "/api/model-install/execute" in javascript
         assert "/api/model-install/status" in javascript
@@ -3432,8 +3544,9 @@ def main() -> int:
         assert '<label id="model-label" for="model">Conversation model</label>' in html
         assert "Browse models" in html
         assert 'byId("open-models-from-chat").addEventListener("click", () => {' in javascript
-        assert 'chat: Object.freeze({' in javascript and 'revision: 11' in javascript
-        assert 'models: Object.freeze({' in javascript and 'revision: 5' in javascript
+        assert 'chat: Object.freeze({\n    label: "Chat",\n    revision: 13,' in javascript
+        assert 'models: Object.freeze({\n    label: "Models",\n    revision: 6,' in javascript
+        assert 'system: Object.freeze({\n    label: "System",\n    revision: 6,' in javascript
         assert "Tested on matching hardware · download requires approval" in javascript
         assert "manualModelCandidates" in javascript
         assert 'id="model-selection-mode">Automatic</span>' in html
@@ -3443,14 +3556,15 @@ def main() -> int:
         assert 'id="conversation-settings-trigger"' in html and 'id="conversation-settings"' in html
         assert 'id="current-model-name"' in html and 'byId("current-model-name").textContent = model || "No model selected"' in javascript
         assert 'class="messages empty-conversation"' in html and '"empty-conversation"' in javascript
-        assert '.chat-panel {\n  height: calc(100vh - 108px);' in styles
+        assert '#text-panel { height: auto; min-height: 0; }' in styles
+        assert 'height: var(--conversation-space, 35svh)' in styles
         assert 'id="rail-cost-estimate"' not in html and 'byId("rail-cost-estimate")' not in javascript
         assert "acceleratorDisplayName" in javascript
         assert "Technical details" in html
         assert 'class="chat-utility-row"' in html
         assert 'createMessageAction("Copy answer"' in javascript
         assert 'createMessageAction("Try again"' in javascript
-        assert 'createMessageAction("Report this answer"' in javascript
+        assert 'Report this answer' not in javascript and 'id="answer-report-panel"' not in html
         assert 'icon.setAttribute("aria-hidden", "true")' in javascript
         assert "state.chatAutoFollow" in javascript
         assert 'id="model-search-consent"' not in html and "Search public catalog" in html
@@ -3500,7 +3614,7 @@ def main() -> int:
         runtime_policy = json.loads((ROOT / "config/local-web-runtime-policy.json").read_text(encoding="utf-8"))
         tour_preferences = runtime_policy["browserPreferences"]
         assert tour_preferences["storageKey"] == "haven42.section-tours.v1"
-        assert tour_preferences["allowedFields"] == ["chat", "models", "system", "technical", "about"]
+        assert tour_preferences["allowedFields"] == ["chat", "models", "system", "about"]
         assert tour_preferences["allowedValueType"] == "positive-integer-tour-revision"
         assert tour_preferences["staleBooleanValuesTreatedAsUnseen"]
         assert tour_preferences["newRevisionRetriggersOnlyChangedSection"]
@@ -3575,12 +3689,12 @@ def main() -> int:
         assert ".context-image img {" in styles and ".context-warning {" in styles
         assert ".context-error {" in styles
         assert 'previewText.textContent = file.content.length > 1000' in javascript
-        assert "clearContextFiles();\n    const wasCancelled" in javascript
+        assert "renderContextFiles();\n    const wasCancelled" in javascript
         assert 'id="stop-generation"' in html
         assert 'api("/api/text/cancel", { requestId: execution.requestId })' in javascript
         assert "Generation stopped · message restored" in javascript
         assert ".composer-surface { flex: 0 0 auto;" in styles
-        assert ".context-panel { grid-column: 1 / -1; max-height: min(96px, 18vh);" in styles and ".context-file {" in styles
+        assert ".context-panel { grid-column: 1 / -1; min-width: 0;" in styles and ".context-file {" in styles
         assert "flex: 1 1 420px;" in styles and "width: 64px; height: 48px;" in styles
         assert ".messages { flex: 1 1 auto;" in styles and "min-height: 0; overflow: auto;" in styles
         assert ".composer { display: grid;" in styles
@@ -3604,20 +3718,19 @@ def main() -> int:
         assert ".message-content h3" in styles and ".message-content ul" in styles
         assert ".message-content pre" in styles and '"Segoe UI Emoji"' in styles
         assert "renderTypedResult" in javascript and "renderCapabilities" in javascript
-        assert "/api/assurance" in javascript and 'id="assurance-panel"' in html
-        assert 'id="assurance-nav"' in html and 'class="panel chat-panel hidden" id="assurance-panel"' in html
-        assert html.index('id="assurance-panel"') < html.index('class="configuration-column"')
-        assert '"system-panel", "assurance-panel", "about-panel"' in javascript and "openAssurance" in javascript
-        assert 'id="assurance-surface-list"' in html and "renderAssuranceSummary" in javascript
-        assert 'id="assurance-status-list"' in html and "assurance-status-item" in javascript
-        assert "supportedActivities} supported" in javascript and "blockedActivities} blocked" in javascript
-        assert html.count('href="https://github.com/hysel/haven-42/wiki/Model-And-Hardware-Test-Status"') == 1
+        assert "/api/assurance" not in javascript and 'id="assurance-panel"' not in html
+        assert 'id="assurance-nav"' not in html
+        assert '"system-panel", "about-panel"' in javascript and "openAssurance" not in javascript
+        assert 'id="assurance-surface-list"' not in html and "renderAssuranceSummary" not in javascript
+        assert 'id="assurance-surface-count"' not in html
+        assert 'Agent surface readiness' not in html
+        assert 'id="assurance-status-list"' not in html
+        assert "supportedActivities} supported" not in javascript and "blockedActivities} blocked" not in javascript
+        assert html.count('href="https://github.com/hysel/haven-42/wiki/Model-And-Hardware-Test-Status"') == 0
         assert html.count('href="https://github.com/hysel/haven-42/issues/new?template=alpha-bug-report.yml"') == 1
-        assert html.count('href="http') == 3
-        assert html.count('target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer"') == 4
-        assert "read-only-assurance-summary" in javascript and "providerInvocation" in javascript
-        assert "This page shows test records included with Haven 42" in html
-        assert ".assurance-list {" in styles and ".assurance-item {" in styles
+        assert html.count('href="http') == 2
+        assert html.count('target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer"') == 3
+        assert ".assurance-list {" not in styles and ".assurance-item {" not in styles
         assert "validateExecutionEvents" in javascript and "event-after-terminal" in javascript
         assert "validateRecovery" in javascript and "invalid-recovery-envelope" in javascript
         assert "missing-accepted-event" in javascript
@@ -3667,7 +3780,7 @@ def main() -> int:
         assert '<nav class="rail" aria-label="Primary navigation">' in html
         assert '<main class="workspace" id="main-content" tabindex="-1">' in html
         assert html.count("<h1") == 1
-        assert html.count('class="nav-icon" aria-hidden="true" viewBox="0 0 24 24"') == 6
+        assert html.count('class="nav-icon" aria-hidden="true" viewBox="0 0 24 24"') == 5
         assert 'id="close-app-nav" type="button"' in html
         assert 'byId("close-app-nav").addEventListener("click"' in javascript
         assert 'await api("/api/shutdown", {})' in javascript

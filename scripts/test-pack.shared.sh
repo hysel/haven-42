@@ -2646,7 +2646,6 @@ assert policy["implementationStatus"] == "text-tools-workflow-planning-and-promo
 assert policy["bind"]["remoteBindAllowed"] is False
 assert policy["browser"]["remoteAssetsAllowed"] is False
 assert policy["browser"]["fixedExternalNavigationUrls"] == [
-    "https://github.com/hysel/haven-42/wiki/Model-And-Hardware-Test-Status",
     "https://github.com/hysel/haven-42/issues/new?template=alpha-bug-report.yml",
     "https://github.com/ollama/ollama/releases",
     "https://ollama.com/download/windows",
@@ -2750,7 +2749,6 @@ lowered = assets.lower()
 assert not re.search(r'''(?i)src\s*=\s*["']https?://|fetch\(\s*["']https?://''', assets)
 external_links = sorted(re.findall(r'''(?i)href\s*=\s*["']https?://[^"']+["']''', assets))
 assert external_links == sorted([
-    'href="https://github.com/hysel/haven-42/wiki/Model-And-Hardware-Test-Status"',
     'href="https://github.com/hysel/haven-42/issues/new?template=alpha-bug-report.yml"',
     'href="https://github.com/ollama/ollama/releases"',
     'href = "https://ollama.com/download/mac"',

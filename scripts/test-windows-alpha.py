@@ -8,6 +8,8 @@ import importlib.util
 import json
 import tempfile
 from pathlib import Path
+from unittest.mock import patch
+from types import SimpleNamespace
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -289,6 +291,61 @@ def main() -> int:
     }
     checks += 2
 
+    for output, expected in [(b"40.5\n", 40.5), (b"20\n30\n", 50), (b"0\n", 0),
+                             (b"N/A\n", None), (b"30\nN/A\n", None), (b"nan\n", None),
+                             (b"-1\n", None), (b"2001\n", None), (b"", None)]:
+        with patch.object(MODULE.shutil, "which", return_value="nvidia-smi"), patch.object(
+            MODULE.subprocess, "run", return_value=SimpleNamespace(returncode=0, stdout=output)
+        ) as run:
+            power = MODULE._nvidia_power_sample()
+            assert (power["watts"] if power else None) == expected
+            assert run.call_args.args[0] == ["nvidia-smi", "--query-gpu=power.draw", "--format=csv,noheader,nounits"]
+            assert run.call_args.kwargs["shell"] is False and run.call_args.kwargs["timeout"] == 2
+        checks += 1
+    with patch.object(MODULE.shutil, "which", return_value=None):
+        assert MODULE._nvidia_power_sample() is None
+    with patch.object(MODULE.shutil, "which", return_value="nvidia-smi"), patch.object(
+        MODULE.subprocess, "run", side_effect=MODULE.subprocess.TimeoutExpired("nvidia-smi", 2)
+    ):
+        assert MODULE._nvidia_power_sample() is None
+    checks += 2
+    with tempfile.TemporaryDirectory() as directory:
+        sensors = Path(directory) / "hwmon"
+        gpu = sensors / "hwmon0"
+        gpu.mkdir(parents=True)
+        (gpu / "name").write_text("amdgpu")
+        (gpu / "power1_average").write_text("25000000")
+        counters = Path(directory) / "powercap"
+        assert MODULE._linux_power_sample(sensors, counters) == {"scope": "amd-gpus", "source": "linux-hwmon", "watts": 25}
+        (gpu / "power1_average").write_text("not available")
+        assert MODULE._linux_power_sample(sensors, counters) is None
+        zone = counters / "package0"
+        zone.mkdir(parents=True)
+        class Zone:
+            name = "intel-rapl:0"
+
+            def __truediv__(self, field):
+                return zone / field
+
+            def __str__(self):
+                return "synthetic-package0"
+
+        counters = SimpleNamespace(glob=lambda pattern: [Zone()])
+        (zone / "name").write_text("package-0")
+        (zone / "energy_uj").write_text("90000000")
+        (zone / "max_energy_range_uj").write_text("100000000")
+        MODULE._CPU_ENERGY_PREVIOUS.clear()
+        with patch.object(MODULE.time, "monotonic", return_value=10):
+            assert MODULE._linux_power_sample(sensors, counters) is None
+        (zone / "energy_uj").write_text("30000000")
+        with patch.object(MODULE.time, "monotonic", return_value=12):
+            assert MODULE._linux_power_sample(sensors, counters) == {"scope": "cpu-packages", "source": "linux-rapl", "watts": 20}
+        with patch.object(MODULE.time, "monotonic", return_value=100):
+            assert MODULE._linux_power_sample(sensors, counters) is None  # Stale counters are not an average.
+        with patch.object(MODULE, "_sensor_text", side_effect=PermissionError):
+            assert MODULE._linux_power_sample(sensors, counters) is None
+        MODULE._CPU_ENERGY_PREVIOUS.clear()
+        checks += 6
     print(f"Windows alpha hostile tests passed: {checks} checks.")
     return 0
 

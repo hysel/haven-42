@@ -80,12 +80,12 @@ const LAST_SECTION_STORAGE_KEY = "haven42.last-section.v1";
 const SECTION_TOURS = Object.freeze({
   chat: Object.freeze({
     label: "Chat",
-    revision: 11,
+    revision: 13,
     panelId: "text-panel",
     returnId: "capability-title",
     steps: Object.freeze([
-      { target: ".rail", title: "Move around Haven 42", description: "Use this menu to open Chat, Models, System, Technical details, or About. Each section has its own short help tour." },
-      { target: ".conversation-toolbar", title: "See the model or change settings", description: "The current model and Automatic or Manual choice stay visible here. Open Settings to choose an installed model or a tested download, adjust text size, browse models, or start a new task." },
+      { target: ".rail", title: "Move around Haven 42", description: "Use this menu to open Chat, Models, System, or About. Each section has its own short help tour." },
+      { target: ".conversation-toolbar", title: "Choose your conversation model", description: "Open the model picker to search installed and recommended models, or keep Automatic. Uninstalled choices require download approval. Open Settings for task type, text size, or a new task." },
       { target: "#messages", title: "Your conversation comes first", description: "Questions and answers use the main area of this page. Haven 42 follows new replies unless you scroll up to review an earlier message." },
       { target: ".composer-surface", title: "Write and attach files", description: "Type your request here, press Enter to send, or use Shift+Enter for a new line. Attachments stay in memory for the current task, and the Keep setting controls prompt recall for this session." },
       { target: "#research-tools", title: "Research with explicit approval", description: "Choose Wikipedia or a wider-web browser search. Haven 42 shows the exact search words before every request, never lets the AI browse on its own, and keeps in-app research only in memory." },
@@ -107,7 +107,7 @@ const SECTION_TOURS = Object.freeze({
   }),
   system: Object.freeze({
     label: "System",
-    revision: 5,
+    revision: 6,
     panelId: "system-panel",
     returnId: "system-workspace-title",
     steps: Object.freeze([
@@ -116,19 +116,7 @@ const SECTION_TOURS = Object.freeze({
       { target: "#open-diagnostics", title: "Open troubleshooting logs", description: "Use this clearly labeled button to see recent sanitized technical events or save a support report. Search words, chats, and responses are not recorded." },
       { target: "#software-updates", title: "Choose certified or newest", description: "Certified releases are recommended. You may also review a newer official Ollama release before Haven 42 finishes compatibility testing; every install requires approval, and the certified runtime remains available for rollback." },
       { target: "#evidence-panel", title: "Check connection health", description: "These checks explain whether the AI server, model information, and local files are ready." },
-      { target: "#energy-estimator-panel", title: "Estimate graphics-card electricity", description: "Use a measured GPU average and your own electricity rate. Official averages are optional, location is never inferred, and the result is not a whole-computer bill prediction." },
-    ]),
-  }),
-  technical: Object.freeze({
-    label: "Technical details",
-    revision: 2,
-    panelId: "assurance-panel",
-    returnId: "assurance-title",
-    steps: Object.freeze([
-      { target: "#assurance-title", title: "Technical test details", description: "This optional page summarizes the evidence included with this Haven 42 build. It is mainly for advanced users and contributors." },
-      { target: "#assurance-panel .status-list", title: "Evidence summary", description: "These counts show how many test records, models, and app surfaces are represented in the included evidence." },
-      { target: "#assurance-status-list", title: "Evidence outcomes", description: "Review the recorded test outcomes here. Opening this page does not run a live hardware test." },
-      { target: ".assurance-wiki-link", title: "Open the detailed evidence", description: "Use this link when you want the full evidence dashboard on GitHub. It opens an external website in a new tab." },
+      { target: "#energy-estimator-panel", title: "Estimate electricity cost", description: "Use available local GPU or CPU power readings, or enter your measured average. Automatic readings cover only the labeled components, not the whole computer or a remote AI server. Use your own electricity rate; official averages are optional and location is never inferred." },
     ]),
   }),
   about: Object.freeze({
@@ -148,7 +136,6 @@ const PANEL_TOUR_SECTIONS = Object.freeze({
   "text-panel": "chat",
   "models-panel": "models",
   "system-panel": "system",
-  "assurance-panel": "technical",
   "about-panel": "about",
 });
 
@@ -190,14 +177,12 @@ const state = {
   setupOperationActive: false,
   setupModelDownload: false,
   workflows: [],
-  assurance: null,
   imageConnected: false,
   lastFocusBeforeWizard: null,
   localSetupReturnToChat: false,
   pendingTextRequest: null,
   activeTextExecution: null,
   approvedTextRequest: null,
-  pendingAnswerReport: null,
   alphaTextOnly: true,
   appVersion: "unknown",
   platformFamily: "unknown",
@@ -546,192 +531,12 @@ async function loadWorkflows() {
   byId("workflow-plan-button").disabled = state.workflows.length === 0;
 }
 
-function validateAssuranceSummary(result) {
-  const exactKeys = (value, fields) => (
-    value
-    && typeof value === "object"
-    && !Array.isArray(value)
-    && Object.getPrototypeOf(value) === Object.prototype
-    && Object.keys(value).sort().join(",") === [...fields].sort().join(",")
-  );
-  const effects = [
-    "filesystemWrite", "machineModification", "networkAccess",
-    "processCreation", "providerInvocation", "repositoryRead",
-  ];
-  if (
-    !exactKeys(result, [
-      "disclosures", "effects", "evidence", "kind", "schemaVersion",
-      "sources", "status", "surfaces",
-    ])
-    || result.schemaVersion !== 1
-    || result.kind !== "read-only-assurance-summary"
-    || result.status !== "ready"
-    || !exactKeys(result.sources, ["evidenceCatalog", "surfaceMatrix", "surfaceSolutions"])
-    || result.sources.evidenceCatalog !== "config/evidence-catalog.tsv"
-    || result.sources.surfaceMatrix !== "config/agent-surface-capabilities.json"
-    || result.sources.surfaceSolutions !== "config/agent-surface-solutions.json"
-    || !exactKeys(result.evidence, ["modelCount", "recordCount", "statusCounts"])
-    || !Number.isSafeInteger(result.evidence.recordCount)
-    || result.evidence.recordCount < 1
-    || result.evidence.recordCount > 10000
-    || !Number.isSafeInteger(result.evidence.modelCount)
-    || result.evidence.modelCount < 0
-    || result.evidence.modelCount > result.evidence.recordCount
-    || !Array.isArray(result.evidence.statusCounts)
-    || result.evidence.statusCounts.length > 32
-    || !Array.isArray(result.surfaces)
-    || result.surfaces.length > 16
-    || !exactKeys(result.effects, effects)
-    || effects.some((field) => result.effects[field] !== false)
-    || !exactKeys(result.disclosures, [
-      "committedSanitizedEvidenceOnly", "liveValidationPerformed",
-      "productionReadinessClaimed", "providerContacted",
-      "repositoryInspected",
-    ])
-    || result.disclosures.committedSanitizedEvidenceOnly !== true
-    || result.disclosures.liveValidationPerformed !== false
-    || result.disclosures.productionReadinessClaimed !== false
-    || result.disclosures.providerContacted !== false
-    || result.disclosures.repositoryInspected !== false
-  ) throw new Error("invalid-assurance-summary");
-  const statuses = new Set();
-  result.evidence.statusCounts.forEach((item) => {
-    if (
-      !exactKeys(item, ["count", "status"])
-      || !/^[a-z][a-z0-9-]{0,63}$/.test(item.status)
-      || statuses.has(item.status)
-      || !Number.isSafeInteger(item.count)
-      || item.count < 1
-      || item.count > result.evidence.recordCount
-    ) throw new Error("invalid-assurance-summary");
-    statuses.add(item.status);
-  });
-  const surfaceIds = new Set();
-  result.surfaces.forEach((surface) => {
-    if (
-      !exactKeys(surface, [
-        "blockedActivities", "configureStatus", "id", "installStatus", "name",
-        "supportTier", "supportedActivities", "testStatus", "validatedActivities",
-        "validationLevel",
-      ])
-      || !/^[a-z][a-z0-9-]{0,63}$/.test(surface.id)
-      || surfaceIds.has(surface.id)
-      || typeof surface.name !== "string"
-      || surface.name.length < 1
-      || surface.name.length > 80
-      || !["supported", "candidate"].includes(surface.supportTier)
-      || !/^[a-z][a-z0-9-]{0,63}$/.test(surface.validationLevel)
-      || !["supported", "validated", "planned", "scaffolded", "blocked", "retired"].includes(surface.installStatus)
-      || !["supported", "validated", "planned", "scaffolded", "blocked", "retired"].includes(surface.configureStatus)
-      || !["supported", "validated", "planned", "scaffolded", "blocked", "retired"].includes(surface.testStatus)
-      || ["supportedActivities", "validatedActivities", "blockedActivities"].some(
-        (field) => !Number.isSafeInteger(surface[field]) || surface[field] < 0 || surface[field] > 32,
-      )
-    ) throw new Error("invalid-assurance-summary");
-    surfaceIds.add(surface.id);
-  });
-  return result;
-}
-
-function renderAssuranceSummary(result) {
-  state.assurance = validateAssuranceSummary(result);
-  byId("assurance-badge").textContent = "Committed evidence";
-  byId("assurance-badge").classList.add("good");
-  byId("assurance-record-count").textContent = String(result.evidence.recordCount);
-  byId("assurance-model-count").textContent = String(result.evidence.modelCount);
-  byId("assurance-surface-count").textContent = String(result.surfaces.length);
-  byId("assurance-live-status").textContent = "Not run · read-only summary";
-  const statuses = byId("assurance-status-list");
-  statuses.replaceChildren();
-  const outcomeGroups = [
-    { id: "passed", title: "Passed", matches: (status) => /(?:pass|validated|verified|supported)/u.test(status) && !/(?:partial|fail|block)/u.test(status) },
-    { id: "partial", title: "Partial or candidate", matches: (status) => /(?:partial|candidate|planned|scaffold|not-run|pending)/u.test(status) },
-    { id: "blocked", title: "Failed or blocked", matches: (status) => /(?:fail|block|retired)/u.test(status) },
-  ];
-  const remaining = [...result.evidence.statusCounts];
-  outcomeGroups.forEach((group) => {
-    const items = remaining.filter((item) => group.matches(item.status));
-    items.forEach((item) => remaining.splice(remaining.indexOf(item), 1));
-    if (items.length === 0) return;
-    const cluster = document.createElement("section");
-    cluster.className = `assurance-cluster ${group.id}`;
-    const heading = document.createElement("h4");
-    heading.textContent = group.title;
-    const grid = document.createElement("div");
-    grid.className = "assurance-cluster-grid";
-    items.forEach((item) => {
-      const row = document.createElement("div");
-      row.className = `assurance-status-item ${group.id}`;
-      const label = document.createElement("span");
-      label.textContent = item.status.replaceAll("-", " ");
-      const count = document.createElement("strong");
-      count.textContent = String(item.count);
-      row.append(label, count);
-      grid.append(row);
-    });
-    cluster.append(heading, grid);
-    statuses.append(cluster);
-  });
-  if (remaining.length > 0) {
-    const cluster = document.createElement("section");
-    cluster.className = "assurance-cluster informational";
-    const heading = document.createElement("h4");
-    heading.textContent = "Informational";
-    const grid = document.createElement("div");
-    grid.className = "assurance-cluster-grid";
-    remaining.forEach((item) => {
-      const row = document.createElement("div");
-      row.className = "assurance-status-item informational";
-      const label = document.createElement("span");
-      label.textContent = item.status.replaceAll("-", " ");
-      const count = document.createElement("strong");
-      count.textContent = String(item.count);
-      row.append(label, count);
-      grid.append(row);
-    });
-    cluster.append(heading, grid);
-    statuses.append(cluster);
-  }
-  const container = byId("assurance-surface-list");
-  container.replaceChildren();
-  result.surfaces.forEach((surface) => {
-    const row = document.createElement("div");
-    row.className = "assurance-item";
-    const identity = document.createElement("div");
-    const title = document.createElement("strong");
-    title.textContent = surface.name;
-    const detail = document.createElement("small");
-    detail.textContent = `${surface.validationLevel} · ${surface.supportTier} · ${surface.supportedActivities} supported · ${surface.validatedActivities} validated · ${surface.blockedActivities} blocked`;
-    identity.append(title, detail);
-    const status = document.createElement("small");
-    status.className = `assurance-state${surface.supportTier === "candidate" ? " candidate" : ""}`;
-    status.textContent = `Install ${surface.installStatus} · Configure ${surface.configureStatus} · Test ${surface.testStatus}`;
-    row.append(identity, status);
-    container.append(row);
-  });
-}
-
-function renderAssuranceUnavailable() {
-  state.assurance = null;
-  byId("assurance-badge").textContent = "Unavailable";
-  byId("assurance-badge").classList.remove("good");
-  byId("assurance-record-count").textContent = "Unavailable";
-  byId("assurance-model-count").textContent = "Unavailable";
-  byId("assurance-surface-count").textContent = "Unavailable";
-  byId("assurance-live-status").textContent = "Not run";
-  byId("assurance-status-list").replaceChildren();
-  byId("assurance-surface-list").replaceChildren();
-}
-
-async function loadAssurance() {
-  const result = await api("/api/assurance", {});
-  renderAssuranceSummary(result);
-}
 
 function showPrimaryPanel(panelId, navigationId, focusId) {
+  if (panelId !== "text-panel" && byId("chat-model-popover").matches(":popover-open")) byId("chat-model-popover").hidePopover();
   if (panelId !== "text-panel") byId("research-tools").open = false;
   if (panelId !== "text-panel") byId("conversation-settings").open = false;
-  ["text-panel", "software-panel", "image-panel", "models-panel", "system-panel", "assurance-panel", "about-panel"].forEach((id) => {
+  ["text-panel", "software-panel", "image-panel", "models-panel", "system-panel", "about-panel"].forEach((id) => {
     byId(id).classList.toggle("hidden", id !== panelId);
   });
   state.activePanelId = panelId;
@@ -756,7 +561,6 @@ function restoreLastSection() {
     "text-panel": openChat,
     "models-panel": openModels,
     "system-panel": openSystem,
-    "assurance-panel": openAssurance,
     "about-panel": openAbout,
   };
   (routes[panelId] || openChat)();
@@ -769,12 +573,14 @@ function initializeSystemWorkspace() {
   }
 }
 
-const ENERGY_MEASUREMENT_PROFILES = Object.freeze({
-  "rx7800xt-qwen35-9b": Object.freeze({
-    watts: 40.084,
-    label: "RX 7800 XT · Qwen 3.5 9B · Ollama 0.32.5",
-  }),
+const POWER_SCOPES = Object.freeze({
+  "nvidia-gpus": "NVIDIA GPU power only",
+  "amd-gpus": "AMD GPU sensor power only",
+  "cpu-packages": "CPU package power only",
 });
+let powerWindow = null;
+let energyMeasurementScope = "Entered measurement";
+let metricsRefreshInFlight = false;
 
 // The official European source supports this admitted country set. Country
 // choices are explicit; Haven 42 never infers a location from the network,
@@ -848,15 +654,54 @@ function updateEnergyRateControls() {
   byId("energy-estimate-result").classList.add("hidden");
 }
 
-function updateEnergyMeasurement() {
-  const profile = ENERGY_MEASUREMENT_PROFILES[byId("energy-measurement-profile").value];
-  const input = byId("energy-average-watts");
-  input.readOnly = Boolean(profile);
-  input.value = profile ? String(profile.watts) : "";
-  byId("energy-measurement-help").textContent = profile
-    ? `${profile.label}. This is GPU-board power from one exact 30-minute test, not a general rating for the card.`
-    : "Enter an average measured by your graphics vendor's tool or a wall meter. Do not enter the card's advertised maximum power.";
+function renderPowerMeasurement(sample) {
+  const reading = sample?.power;
+  const stamp = sample?.sampledAtMonotonicMs;
+  const expectedSource = {"nvidia-gpus": "nvidia-smi", "amd-gpus": "linux-hwmon", "cpu-packages": "linux-rapl"};
+  const valid = reading && Object.hasOwn(POWER_SCOPES, reading.scope)
+    && reading.source === expectedSource[reading.scope]
+    && typeof reading.watts === "number" && Number.isFinite(reading.watts)
+    && reading.watts >= 0 && reading.watts <= 2000
+    && typeof stamp === "number" && Number.isFinite(stamp) && stamp >= 0;
+  const button = byId("energy-use-measured");
+  const live = byId("energy-live-power");
+  if (!valid) {
+    powerWindow = null;
+    if (document.activeElement === button) byId("energy-average-watts").focus();
+    button.classList.add("hidden");
+    live.classList.add("hidden");
+    live.textContent = "";
+    byId("energy-measurement-help").textContent = "Power measurement unavailable. You can enter your own measured average below.";
+    return;
+  }
+  if (!powerWindow || powerWindow.scope !== reading.scope || stamp <= powerWindow.stamp
+    || stamp - powerWindow.stamp > 30000 || stamp - powerWindow.start > 300000) {
+    powerWindow = {scope: reading.scope, start: stamp, stamp, watts: reading.watts, integral: 0, duration: 0};
+  } else {
+    const elapsed = stamp - powerWindow.stamp;
+    powerWindow.integral += (powerWindow.watts + reading.watts) / 2 * elapsed;
+    powerWindow.duration += elapsed;
+    powerWindow.stamp = stamp;
+    powerWindow.watts = reading.watts;
+  }
+  const ready = powerWindow.duration >= 4000;
+  const average = ready ? powerWindow.integral / powerWindow.duration : null;
+  powerWindow.average = average;
+  button.classList.toggle("hidden", !ready);
+  live.classList.remove("hidden");
+  byId("energy-measurement-help").textContent = "Local power sensor available. Run a representative workload before using its average. No readings are saved or uploaded.";
+  live.textContent = `${POWER_SCOPES[reading.scope]} · ${reading.watts.toFixed(2)} W latest reading`
+    + (ready ? ` · ${average.toFixed(2)} W average over ${(powerWindow.duration / 1000).toFixed(0)} seconds` : " · collecting an average…");
+}
+
+function useMeasuredPower() {
+  if (!powerWindow || powerWindow.average == null) return;
+  byId("energy-average-watts").value = powerWindow.average.toFixed(3);
+  energyMeasurementScope = POWER_SCOPES[powerWindow.scope];
+  byId("energy-watts-source").textContent = `${energyMeasurementScope} · average over ${(powerWindow.duration / 1000).toFixed(0)} seconds. This value stays fixed until you choose a new average or edit it.`;
   byId("energy-estimate-result").classList.add("hidden");
+  state.energyEstimate = null;
+  syncEnergyStatusWidget();
 }
 
 async function fetchOfficialElectricityRate() {
@@ -899,7 +744,7 @@ async function fetchOfficialElectricityRate() {
 
 function calculateElectricityEstimate(event) {
   event.preventDefault();
-  const watts = energyNumber("energy-average-watts", 0.001, 2000);
+  const watts = byId("energy-average-watts").value.trim() === "" ? null : energyNumber("energy-average-watts", 0, 2000);
   const hours = energyNumber("energy-hours-per-day", 0, 24);
   const days = energyNumber("energy-billing-days", 1, 366);
   const rate = energyNumber("energy-rate", 0, 10000000);
@@ -928,10 +773,10 @@ function calculateElectricityEstimate(event) {
   const formattedCost = `${cost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`;
   const formattedKwh = `${kwh.toFixed(3)} kWh`;
   byId("energy-estimate-cost").textContent = formattedCost;
-  byId("energy-estimate-usage").textContent = `${formattedKwh} of graphics-card energy over ${Math.trunc(days)} days`;
+  byId("energy-estimate-usage").textContent = `${formattedKwh} over ${Math.trunc(days)} days · ${energyMeasurementScope}`;
   byId("energy-estimate-source").textContent = `${source} · ${rate} ${currency}/kWh`;
   result.classList.remove("hidden");
-  state.energyEstimate = Object.freeze({ formattedCost, formattedKwh, days: Math.trunc(days) });
+  state.energyEstimate = Object.freeze({ formattedCost, formattedKwh, days: Math.trunc(days), scope: energyMeasurementScope });
   syncEnergyStatusWidget();
 }
 
@@ -943,7 +788,7 @@ function syncEnergyStatusWidget() {
   if (pinned && estimate) {
     byId("status-energy-kwh").textContent = estimate.formattedKwh;
     byId("status-energy-cost").textContent = estimate.formattedCost;
-    byId("status-energy-period").textContent = `${estimate.days} days · GPU only · current session`;
+    byId("status-energy-period").textContent = `${estimate.days} days · ${estimate.scope} · current session`;
     byId("energy-pin-help").textContent = "Pinned in the status sidebar for this session. The values are not saved.";
   } else if (pinned) {
     byId("energy-pin-help").textContent = "Pinned after you calculate an estimate. The values are not saved.";
@@ -1007,10 +852,6 @@ function openModels() {
 
 function openAbout() {
   showPrimaryPanel("about-panel", "about-nav", "about-title");
-}
-
-function openAssurance() {
-  showPrimaryPanel("assurance-panel", "assurance-nav", "assurance-title");
 }
 
 function setTaskControlsDisabled(disabled) {
@@ -1088,6 +929,8 @@ function humanError(error) {
     "authenticated-provider-requires-https": "API keys require an HTTPS Ollama address when connecting across a private network.",
     "ollama-connection-failed": "Haven 42 could not reach Ollama at that address.",
     "ollama-chat-failed": "Ollama did not complete the text request.",
+    "model-images-unsupported": "The selected model reports that it does not support images. Choose an image-capable model or remove the screenshots. Your message and attachments are kept.",
+    "ollama-image-request-failed": "The provider could not complete this image request. Check that the model and runtime support images, or retry. Your message and attachments are kept.",
     "text-request-cancelled": "Generation stopped. Your message was restored so you can edit or try again.",
     "text-request-already-running": "Wait for the current response to stop before sending another message.",
     "empty-model-response": "The model returned an empty response.",
@@ -1184,7 +1027,6 @@ function humanError(error) {
     "unsafe-portable-data-entry": "Haven 42 found an unexpected linked file or folder, so it safely stopped removal.",
     "portable-data-removal-failed": "Haven could not completely remove its managed data. No other location was touched.",
     "diagnostic-report-save-failed": "Haven 42 could not safely create the support report. No report was uploaded.",
-    "answer-report-save-failed": "Haven 42 could not safely create the answer report. The question and answer were not recorded or uploaded.",
     "diagnostic-clear-failed": "Haven 42 could not safely clear the troubleshooting events.",
     "diagnostic-removal-failed": "Haven 42 found an unexpected item in the log folder, so it left the folder unchanged.",
   };
@@ -1320,8 +1162,44 @@ function validModelSize(value) {
     && ["ollama-installed", "ollama-catalog"].includes(value.source);
 }
 
+const knownModelSizes = new Map();
+let modelSizeCheckActive = false;
+
+async function refreshModelSizes(online = false) {
+  if (modelSizeCheckActive) return;
+  modelSizeCheckActive = true;
+  const controls = [byId("chat-model-size-check"), byId("model-size-check")];
+  const statuses = [byId("chat-model-size-status"), byId("model-size-status")];
+  controls.forEach(button => { button.disabled = true; });
+  const names = [...new Set([...state.modelOptions, ...state.qualifiedModelCandidates, ...state.testedModelOptions, ...state.modelSearchResults].map(item => item.name))].slice(0, 128);
+  try {
+    for (let offset = 0; offset < names.length; offset += online ? 8 : 128) {
+      const batch = names.slice(offset, offset + (online ? 8 : 128));
+      if (online) statuses.forEach(node => { node.textContent = `Checking model sizes ${offset + 1}–${Math.min(offset + 8, names.length)} of ${names.length}…`; });
+      const result = await api("/api/model-metadata", {models: batch, online});
+      if (!hasExactObjectKeys(result, ["sizes", "unavailable", "cacheSaved"])
+        || !result.sizes || typeof result.sizes !== "object" || Array.isArray(result.sizes)
+        || !Array.isArray(result.unavailable) || result.unavailable.some(name => !batch.includes(name))
+        || ![true, false, null].includes(result.cacheSaved)
+        || Object.entries(result.sizes).some(([name, size]) => !batch.includes(name) || !validModelSize(size))) throw new Error("invalid-model-size-metadata");
+      batch.forEach(name => knownModelSizes.delete(name));
+      Object.entries(result.sizes).forEach(([name, size]) => knownModelSizes.set(name, size));
+      renderModelDiscovery();
+      document.dispatchEvent(new Event("model-size-metadata-updated"));
+      if (result.cacheSaved === false && online) throw new Error("model-size-cache-not-writable");
+    }
+    if (online) statuses.forEach(node => { node.textContent = "Size check complete. Available public sizes are cached in Haven42-Data; missing sizes can be checked again."; });
+  } catch (_error) {
+    if (online) statuses.forEach(node => { node.textContent = "Some sizes could not be retrieved or saved locally. You can retry; model downloads are unaffected."; });
+  } finally {
+    modelSizeCheckActive = false;
+    controls.forEach(button => { button.disabled = false; });
+  }
+}
+
 function modelSizeLabel(item) {
-  const size = item?.modelSize;
+  const size = item?.modelSize || knownModelSizes.get(item?.name)
+    || state.modelSearchResults.find(result => result.name === item?.name && validModelSize(result.modelSize))?.modelSize;
   if (!validModelSize(size)) return "Size unavailable";
   const units = ["B", "KB", "MB", "GB", "TB"];
   const index = Math.min(4, Math.floor(Math.log10(size.bytes) / 3));
@@ -1958,6 +1836,7 @@ async function loadHardwareMatchedModels() {
     if (requestId !== state.testedModelRequestId) return;
     state.testedModelCatalog = result;
     state.testedModelOptions = result.options;
+    void refreshModelSizes(false);
     const recommended = result.options.find((item) => item.recommended && item.status === "not-installed");
     if (recommended && !state.desiredModel) state.desiredModel = recommended;
     renderModelSelect();
@@ -3435,11 +3314,12 @@ function formatBytes(value) {
 
 function renderAlphaMetrics(value) {
   if (
-    !value || value.schemaVersion !== 1 || value.kind !== "windows-alpha-local-metrics"
+    !value || value.schemaVersion !== 1 || !["windows-alpha-local-metrics", "linux-alpha-local-metrics", "macos-alpha-local-metrics"].includes(value.kind)
     || value.persisted !== false || value.externalTelemetryUsed !== false
     || !value.sample || value.sample.persisted !== false
     || !value.sessionTokens || value.sessionTokens.persisted !== false
-  ) return;
+  ) { renderPowerMeasurement(null); return; }
+  renderPowerMeasurement(value.sample);
   byId("alpha-cpu").textContent = value.sample.systemCpuPercent == null
     ? "Unavailable" : `${Math.round(value.sample.systemCpuPercent)}%`;
   byId("alpha-ram").textContent = (
@@ -3461,11 +3341,17 @@ function renderAlphaMetrics(value) {
 }
 
 async function refreshAlphaMetrics() {
+  if (metricsRefreshInFlight) return;
+  metricsRefreshInFlight = true;
   try {
-    const response = await fetch("/api/alpha/resources", { credentials: "same-origin", cache: "no-store" });
+    const response = await fetch("/api/alpha/resources", { credentials: "same-origin", cache: "no-store", signal: AbortSignal.timeout(10000) });
     if (response.ok) renderAlphaMetrics(await response.json());
+    else renderPowerMeasurement(null);
   } catch (_error) {
     // The chat path remains usable when a local measurement is unavailable.
+    renderPowerMeasurement(null);
+  } finally {
+    metricsRefreshInFlight = false;
   }
 }
 
@@ -3628,6 +3514,93 @@ function showModelSwitchPrompt(request) {
   byId("use-recommended-model").focus({ preventScroll: true });
 }
 
+function initializeChatModelPicker() {
+  const select = byId("model");
+  const trigger = byId("chat-model-trigger");
+  const panel = byId("chat-model-popover");
+  const search = byId("chat-model-search");
+  const position = () => {
+    if (!panel.matches(":popover-open")) return;
+    const rect = trigger.getBoundingClientRect();
+    const width = Math.min(460, innerWidth - 24);
+    panel.style.width = `${width}px`;
+    panel.style.left = `${Math.max(12, Math.min(rect.left, innerWidth - width - 12))}px`;
+    // Keep the picker reachable even in a short, zoomed window.
+    const top = Math.max(12, Math.min(rect.bottom + 6, innerHeight * 0.4));
+    panel.style.top = `${top}px`;
+    panel.style.maxHeight = `${Math.max(100, innerHeight - top - 12)}px`;
+  };
+  const render = () => {
+    const list = byId("chat-model-results");
+    const focused = list.contains(document.activeElement) ? document.activeElement.dataset.modelValue : null;
+    list.replaceChildren();
+    const query = search.value.trim().toLowerCase();
+    let count = 0;
+    for (const option of select.options) {
+      if (query && !modelMatchesQuery(option.textContent, query)) continue;
+      const row = document.createElement("button");
+      row.type = "button";
+      row.className = "chat-model-option";
+      row.dataset.modelValue = option.value;
+      row.disabled = option.disabled;
+      row.setAttribute("aria-pressed", String(option.selected));
+      const title = document.createElement("strong");
+      const detail = document.createElement("span");
+      const name = option.value.replace(/^(?:manual|candidate):/u, "");
+      title.textContent = option.value === "automatic" ? "Automatic · recommended choice" : name;
+      const item = [...state.modelOptions, ...state.qualifiedModelCandidates, ...state.testedModelOptions].find(item => item.name === name);
+      const description = option.textContent.startsWith(`${name} — `) ? option.textContent.slice(name.length + 3) : option.textContent;
+      detail.textContent = `${option.selected ? "Selected · " : ""}${option.value.startsWith("manual:") ? "Installed · " : ""}${description}${option.value === "automatic" ? "" : ` · ${modelSizeLabel(item)}`}${option.value.startsWith("candidate:") ? " · Review download" : ""}`;
+      row.append(title, detail);
+      row.addEventListener("click", () => {
+        if (select.disabled) return;
+        panel.hidePopover();
+        trigger.focus({preventScroll: true});
+        select.value = option.value;
+        select.dispatchEvent(new Event("change", {bubbles: true}));
+      });
+      list.append(row);
+      count += 1;
+    }
+    byId("chat-model-result-count").textContent = count ? `${count} choices` : "No matching models. Try the public catalog.";
+    if (focused) [...list.children].find(row => row.dataset.modelValue === focused)?.focus({preventScroll: true});
+  };
+  const sync = () => {
+    trigger.disabled = select.disabled;
+    const name = byId("current-model-name").textContent || "No model selected";
+    byId("chat-model-name").textContent = name;
+    trigger.title = name;
+    trigger.setAttribute("aria-label", `Conversation model: ${name} · ${byId("model-selection-mode").textContent}`);
+    if (select.disabled && panel.matches(":popover-open")) panel.hidePopover();
+    if (panel.matches(":popover-open")) render();
+  };
+  new MutationObserver(sync).observe(select, {childList: true, subtree: true, attributes: true});
+  panel.addEventListener("toggle", () => {
+    const open = panel.matches(":popover-open");
+    trigger.setAttribute("aria-expanded", String(open));
+    if (open) {
+      search.value = "";
+      render();
+      position();
+      search.focus();
+      void refreshModelSizes(false);
+    }
+  });
+  search.addEventListener("input", render);
+  document.addEventListener("model-size-metadata-updated", () => { if (panel.matches(":popover-open")) render(); });
+  byId("chat-model-size-check").addEventListener("click", () => { void refreshModelSizes(true); });
+  byId("model-size-check").addEventListener("click", () => { void refreshModelSizes(true); });
+  byId("chat-model-browse").addEventListener("click", () => {
+    panel.hidePopover();
+    openModels();
+    byId("model-search-query").value = search.value;
+    byId("model-search-query").focus();
+  });
+  window.addEventListener("resize", position);
+  window.addEventListener("scroll", position, true);
+  sync();
+}
+
 function renderModelSelect() {
   const select = byId("model");
   const capabilityId = state.capabilityId;
@@ -3652,7 +3625,7 @@ function renderModelSelect() {
 
   if (state.modelOptions.length > 0) {
     const advanced = document.createElement("optgroup");
-    advanced.label = "Advanced manual selection";
+    advanced.label = "Installed models";
     for (const item of state.modelOptions) {
       const option = document.createElement("option");
       const status = item.capabilityStatus[capabilityId] || "unverified";
@@ -3908,7 +3881,7 @@ function renderTypedResult(result, capability, capabilityId) {
   const warnings = validateExecutionEvents(result.events, "result");
   const summary = `${capability.resultLabel} ready · kept in this session · no file saved`;
   if (warnings.some((event) => event.code === "MODEL_IMAGE_INPUT_UNVERIFIED")) {
-    setTaskEvent(`Warning · Haven 42 has not confirmed that this model can understand screenshots · ${summary}`, "warning");
+    setTaskEvent(`The provider did not report image capability; the request completed · ${summary}`, "result");
   } else if (warnings.some((event) => event.code === "MODEL_SELECTION_UNVERIFIED_FOR_CAPABILITY")) {
     setTaskEvent(`Warning · Haven 42 has not tested this model for the selected task · ${summary}`, "warning");
   } else {
@@ -4113,24 +4086,6 @@ function validAnswerReportIdentity(value) {
   );
 }
 
-function closeAnswerReport(restoreFocus = true) {
-  const trigger = state.pendingAnswerReport?.trigger;
-  state.pendingAnswerReport = null;
-  byId("answer-report-panel").classList.add("hidden");
-  byId("answer-report-note").value = "";
-  byId("answer-report-status").textContent = "";
-  if (restoreFocus && trigger?.isConnected) trigger.focus();
-}
-
-function openAnswerReport(identity, trigger) {
-  if (!validAnswerReportIdentity(identity)) return;
-  state.pendingAnswerReport = { identity: {...identity}, trigger };
-  byId("answer-report-category").value = "incorrect";
-  byId("answer-report-note").value = "";
-  byId("answer-report-status").textContent = "Nothing is sent anywhere. The report stays in Haven42-Logs.";
-  byId("answer-report-panel").classList.remove("hidden");
-  byId("answer-report-category").focus();
-}
 
 function createMessageAction(label, iconPaths) {
   const button = document.createElement("button");
@@ -4196,10 +4151,7 @@ function addMessage(role, content, label, answerReportIdentity = null) {
       byId("prompt").focus();
       setTaskEvent("Previous request restored for review. Press Send when you are ready.", "result");
     });
-    const report = createMessageAction("Report this answer", ["M5 21V4", "M5 5h12l-2 4 2 4H5"]);
-    const reportButton = report.button;
-    reportButton.addEventListener("click", () => openAnswerReport(answerReportIdentity, reportButton));
-    actions.append(copy, retryButton, reportButton);
+    actions.append(copy, retryButton);
     body.append(actions);
   }
   article.append(avatar, body);
@@ -5455,7 +5407,6 @@ function recallPrompt(direction) {
 }
 
 function resetTask() {
-  if (state.pendingAnswerReport) closeAnswerReport(false);
   state.messages = [];
   state.approvedTextRequest = null;
   hideModelSwitchPrompt();
@@ -5704,11 +5655,6 @@ async function bootstrap() {
       }
     }
     if (!state.alphaTextOnly) await loadWorkflows();
-    try {
-      await loadAssurance();
-    } catch (_error) {
-      renderAssuranceUnavailable();
-    }
     byId("update-status").textContent = result.updates?.mode === "user-initiated-only"
       ? "Only when you choose Check now"
       : "Unavailable";
@@ -6036,7 +5982,9 @@ byId("text-form").addEventListener("submit", async (event) => {
   event.preventDefault();
   clearError();
   const prompt = byId("prompt");
-  const content = prompt.value.trim();
+  const content = prompt.value.trim() || (state.contextImages.length
+    ? "Describe this screenshot and point out anything notable."
+    : "");
   if (!content || !state.connected) return;
   clearResearchWorkspace();
   const capabilityId = suggestedCapability(content);
@@ -6104,7 +6052,9 @@ byId("text-form").addEventListener("submit", async (event) => {
       || result.context.totalBytes !== state.contextFiles.reduce((sum, file) => sum + file.sizeBytes, 0)
       || result.context.imageCount !== state.contextImages.length
       || result.context.imageTotalBytes !== state.contextImages.reduce((sum, image) => sum + image.sizeBytes, 0)
-      || result.context.imageInputEvidence !== (state.contextImages.length ? "unverified" : "not-requested")
+      || !(state.contextImages.length
+        ? ["unverified", "provider-reported-supported"].includes(result.context.imageInputEvidence)
+        : result.context.imageInputEvidence === "not-requested")
       || result.context.providerTrustScope !== state.providerTrustScope
       || result.context.persisted !== false
       || result.context.temporaryFilesWritten !== false
@@ -6131,7 +6081,7 @@ byId("text-form").addEventListener("submit", async (event) => {
     state.messages = previousMessages;
     userMessage.remove();
     prompt.value = content;
-    clearContextFiles();
+    renderContextFiles();
     const wasCancelled = execution.cancelRequested || displayedError.message === "text-request-cancelled";
     if (wasCancelled) clearError();
     else showError(humanError(displayedError));
@@ -6376,7 +6326,6 @@ byId("open-models-from-chat").addEventListener("click", () => {
   byId("conversation-settings").open = false;
   openModels();
 });
-byId("assurance-nav").addEventListener("click", openAssurance);
 byId("about-nav").addEventListener("click", openAbout);
 byId("workflow-plan-button").addEventListener("click", async () => {
   clearError();
@@ -6518,7 +6467,14 @@ byId("system-nav").addEventListener("click", () => {
   openSystem();
 });
 byId("view-system-details").addEventListener("click", openSystem);
-byId("energy-measurement-profile").addEventListener("change", updateEnergyMeasurement);
+byId("energy-use-measured").addEventListener("click", useMeasuredPower);
+byId("energy-average-watts").addEventListener("input", () => {
+  energyMeasurementScope = "Entered measurement";
+  byId("energy-watts-source").textContent = "Manual entry: use a measured average, not the hardware's advertised maximum power.";
+  state.energyEstimate = null;
+  byId("energy-estimate-result").classList.add("hidden");
+  syncEnergyStatusWidget();
+});
 byId("energy-rate-source").addEventListener("change", updateEnergyRateControls);
 byId("energy-pin-status").addEventListener("change", syncEnergyStatusWidget);
 byId("status-energy-remove").addEventListener("click", () => {
@@ -7002,37 +6958,6 @@ byId("refresh-diagnostics").addEventListener("click", async () => {
     byId("diagnostics-action-status").textContent = humanError(error);
   }
 });
-byId("cancel-answer-report").addEventListener("click", () => closeAnswerReport());
-byId("save-answer-report").addEventListener("click", async () => {
-  const pending = state.pendingAnswerReport;
-  if (!pending || !validAnswerReportIdentity(pending.identity)) return;
-  const button = byId("save-answer-report");
-  const testerNote = byId("answer-report-note").value.trim();
-  button.disabled = true;
-  byId("answer-report-status").textContent = "Saving a private report in Haven42-Logs…";
-  try {
-    const result = await api("/api/alpha/diagnostics/answer-report", {
-      reportToken: pending.identity.reportToken,
-      category: byId("answer-report-category").value,
-      testerNote,
-    });
-    if (
-      !result || result.saved !== true || result.directoryName !== "Haven42-Logs"
-      || result.automaticUpload !== false
-      || !/^answer-report-[a-f0-9]{16}\.json$/.test(result.fileName)
-      || !/^[a-f0-9]{16}$/.test(result.eventReference)
-      || Object.keys(result).sort().join("|") !== "automaticUpload|directoryName|eventReference|fileName|saved"
-    ) throw new Error("invalid-answer-report-result");
-    closeAnswerReport(false);
-    setTaskEvent(`Private answer report saved as ${result.fileName} in Haven42-Logs · nothing uploaded`, "result");
-    await refreshDiagnosticsQuietly();
-    pending.trigger?.focus();
-  } catch (error) {
-    byId("answer-report-status").textContent = humanError(error);
-  } finally {
-    button.disabled = false;
-  }
-});
 byId("save-support-report").addEventListener("click", async () => {
   byId("diagnostics-action-status").textContent = "Creating a private local report…";
   try {
@@ -7267,10 +7192,51 @@ byId("section-tour-layer").addEventListener("keydown", (event) => {
 window.addEventListener("resize", positionSectionTour);
 window.addEventListener("scroll", positionSectionTour, true);
 
+// Size the conversation from actual content, not a guessed toolbar height.
+// Short windows may scroll the page; messages must never collapse to a sliver.
+function initializeResponsiveConversation() {
+  const panel = byId("text-panel");
+  const messages = byId("messages");
+  let frame = 0;
+  const schedule = () => {
+    if (frame) return;
+    frame = requestAnimationFrame(() => {
+      frame = 0;
+      if (!panel.getClientRects().length) return;
+      const panelStyle = getComputedStyle(panel);
+      const px = (value) => Number.parseFloat(value) || 0;
+      const siblings = [...panel.children].filter((child) => child !== messages && child.getClientRects().length);
+      const chrome = siblings.reduce((total, child) => {
+        const style = getComputedStyle(child);
+        return total + child.getBoundingClientRect().height + px(style.marginTop) + px(style.marginBottom);
+      }, px(panelStyle.paddingTop) + px(panelStyle.paddingBottom) + px(panelStyle.borderTopWidth) + px(panelStyle.borderBottomWidth));
+      const messageStyle = getComputedStyle(messages);
+      const top = panel.getBoundingClientRect().top + window.scrollY;
+      const gap = px(panelStyle.rowGap) * siblings.length;
+      const available = Math.max(200, Math.floor(window.innerHeight - top - chrome - gap
+        - px(messageStyle.marginTop) - px(messageStyle.marginBottom) - 16));
+      const value = `${available}px`;
+      if (panel.style.getPropertyValue("--conversation-space") === value) return;
+      const follow = state.chatAutoFollow;
+      panel.style.setProperty("--conversation-space", value);
+      if (follow) messages.scrollTop = messages.scrollHeight;
+    });
+  };
+  // Do not observe the message box itself: resizing it must not feed back into
+  // its own calculation. Other children include disclosures and the composer.
+  const observer = new ResizeObserver(schedule);
+  [...panel.children].filter((child) => child !== messages).forEach((child) => observer.observe(child));
+  document.querySelectorAll(".topbar, .rail").forEach((element) => observer.observe(element));
+  window.addEventListener("resize", schedule);
+  schedule();
+}
+
+initializeResponsiveConversation();
+initializeChatModelPicker();
 updateProviderAuthenticationControl();
 updateProviderAuthenticationControl("wizard-");
 initializeSystemWorkspace();
 initializeStatusSidebar();
-updateEnergyMeasurement();
+renderPowerMeasurement(null);
 updateEnergyRateControls();
 bootstrap();

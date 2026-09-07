@@ -7,6 +7,11 @@ from html.parser import HTMLParser
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 import re
+import json
+import os
+import tempfile
+import threading
+import time
 import ssl
 import sys
 import urllib.error
@@ -28,6 +33,18 @@ class ModelCatalogSearchError(ValueError):
     """A fail-closed public catalog search error."""
 
 
+def load_bundled_model_sizes(path: Path) -> dict[str, int]:
+    """Offline approximate catalog sizes, never hardware-fit or install authority."""
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        if data.get("schemaVersion") != 1 or data.get("source") != CATALOG_ORIGIN:
+            return {}
+        return {name: size for name, size in data["sizes"].items()
+                if MODEL_NAME.fullmatch(name) and type(size) is int and 0 < size <= 16 * 1024 ** 4}
+    except (OSError, ValueError, TypeError, KeyError, AttributeError):
+        return {}
+
+
 class CatalogResults(list):
     """Catalog matches with an explicit notice when tag expansion was partial."""
 
@@ -35,6 +52,98 @@ class CatalogResults(list):
         super().__init__(values)
         self.incomplete = incomplete
         self.sizes = {name: size for name, size in (sizes or {}).items() if name in values}
+
+
+class ModelSizeCache:
+    """Disposable public metadata only; never an install authorization or inventory."""
+
+    TTL = 7 * 24 * 60 * 60
+    LIMIT = 1024
+    MAX_BYTES = 512 * 1024
+
+    def __init__(self, root: Path | None = None):
+        self.root = root
+        self.lock = threading.RLock()
+        self.records = {}
+        if root is not None:
+            try:
+                path = self._path()
+                if path.stat().st_size > self.MAX_BYTES:
+                    return
+                with path.open("rb") as stream:
+                    raw = stream.read(self.MAX_BYTES + 1)
+                if len(raw) > self.MAX_BYTES:
+                    return
+                data = json.loads(raw)
+                if set(data) != {"schemaVersion", "models"} or data["schemaVersion"] != 1:
+                    return
+                if not isinstance(data["models"], dict) or len(data["models"]) > self.LIMIT:
+                    return
+                for name, record in data["models"].items():
+                    if self._valid(name, record):
+                        self.records[name] = record
+            except (OSError, ValueError, TypeError):
+                pass  # Corrupt/unwritable cache must not block the app.
+
+    def _path(self):
+        path = self.root / "model-size-cache.json"
+        if any(p.is_symlink() or getattr(p, "is_junction", lambda: False)() for p in (self.root, path)):
+            raise ValueError("unsafe-model-size-cache-path")
+        return path
+
+    @staticmethod
+    def _valid(name, record):
+        return (isinstance(name, str) and bool(MODEL_NAME.fullmatch(name))
+                and isinstance(record, dict) and set(record) == {"bytes", "checkedAt"}
+                and (record["bytes"] is None or type(record["bytes"]) is int and 0 < record["bytes"] <= 16 * 1024 ** 4)
+                and type(record["checkedAt"]) is int and 0 <= record["checkedAt"] <= time.time() + 60)
+
+    def get(self, name):
+        with self.lock:
+            record = self.records.get(name)
+            return record["bytes"] if record and time.time() - record["checkedAt"] < self.TTL else None
+
+    def update(self, sizes):
+        with self.lock:
+            now = int(time.time())
+            for name, size in sizes.items():
+                if size is None and name in self.records:
+                    continue  # Missing metadata must not renew an older size's TTL.
+                record = {"bytes": size, "checkedAt": now}
+                if self._valid(name, record):
+                    self.records[name] = record
+            self.records = dict(sorted(self.records.items(), key=lambda item: item[1]["checkedAt"], reverse=True)[:self.LIMIT])
+            if self.root is None:
+                return False
+            temporary = None
+            try:
+                path = self._path()
+                self.root.mkdir(parents=True, exist_ok=True)
+                with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=self.root, prefix=".model-size-", suffix=".tmp", delete=False) as stream:
+                    temporary = Path(stream.name)
+                    json.dump({"schemaVersion": 1, "models": self.records}, stream, ensure_ascii=True)
+                self._path()  # Reject a link substitution before replacement.
+                os.replace(temporary, path)
+                return True
+            except (OSError, ValueError):
+                return False
+            finally:
+                if temporary is not None:
+                    try:
+                        temporary.unlink(missing_ok=True)
+                    except OSError:
+                        pass
+
+
+def lookup_ollama_model_size(name: str) -> int | None:
+    """Read an exact tag's catalog row; never fetch model blobs or follow redirects."""
+    if not isinstance(name, str) or not MODEL_NAME.fullmatch(name):
+        raise ModelCatalogSearchError("invalid-model-name")
+    family = name.rsplit(":", 1)[0] if ":" in name.rsplit("/", 1)[-1] else name
+    target = name if family != name else name + ":latest"
+    path = f"/{family}/tags" if "/" in family else f"/library/{family}/tags"
+    variants = parse_ollama_search_html(_fetch_catalog_html(path, 5), None)
+    return variants.sizes.get(target)
 
 
 class _NoRedirect(urllib.request.HTTPRedirectHandler):

@@ -36,6 +36,7 @@ RESOURCE_PATHS = (
     "web/static/styles.css",
     "config/text-capability-model-recommendations.json",
     "config/hardware-qualified-chat-models.json",
+    "config/model-size-catalog.json",
     "examples/apple-m4-16gib-model-qualification.md",
     "examples/amd-rx6800-linux-model-qualification.md",
     "examples/amd-rx6800-windows-model-qualification.md",

@@ -28,6 +28,7 @@ resources = [
     ("web/static/styles.css", "web/static"),
     ("config/text-capability-model-recommendations.json", "config"),
     ("config/hardware-qualified-chat-models.json", "config"),
+    ("config/model-size-catalog.json", "config"),
     ("examples/apple-m4-16gib-model-qualification.md", "examples"),
     ("examples/amd-rx6800-linux-model-qualification.md", "examples"),
     ("examples/amd-rx6800-windows-model-qualification.md", "examples"),

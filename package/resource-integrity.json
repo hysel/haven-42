@@ -3,8 +3,8 @@
   "resources": [
     {
       "path": "web/static/index.html",
-      "sha256": "63011beeee66223387e72e0a17d721cd4be70ae8344a20dee40e3f6634b8587d",
-      "sizeBytes": 79908
+      "sha256": "ad14e7a7b114f15978aaea4166721b612e50a68a4852d362c3524a497901fafa",
+      "sizeBytes": 78015
     },
     {
       "path": "web/static/accessibility.html",
@@ -13,13 +13,13 @@
     },
     {
       "path": "web/static/app.js",
-      "sha256": "41f84bbf02b36fecc9f347b4a917600411af383b48c6dcdb0534dab11b0165d0",
-      "sizeBytes": 331175
+      "sha256": "541f7e86eaa1a57c02f57187d9ecee2a252edbafe11680e9e467d40966e5b289",
+      "sizeBytes": 331415
     },
     {
       "path": "web/static/styles.css",
-      "sha256": "222795e294c18e9554fffd1b734fc88d2f14e3f5726f33345eee172d73dfae36",
-      "sizeBytes": 88414
+      "sha256": "a7a6ef027747a1bbc5654ed238f694cc7e6551088023277a56546b8affe22fa2",
+      "sizeBytes": 91170
     },
     {
       "path": "config/text-capability-model-recommendations.json",
@@ -30,6 +30,11 @@
       "path": "config/hardware-qualified-chat-models.json",
       "sha256": "fb7ef3ae327b93af911274f7bee4a30aff8cb64a2425c7b40b6fcc29e46321dc",
       "sizeBytes": 3049
+    },
+    {
+      "path": "config/model-size-catalog.json",
+      "sha256": "05512d95e221232c2ffcf9c21f25ab04ece2edce8eabf3c8bbeda87bbd29febd",
+      "sizeBytes": 1123
     },
     {
       "path": "examples/apple-m4-16gib-model-qualification.md",

@@ -14,7 +14,6 @@
     "crossOriginRequestsAllowed": false,
     "automaticLaunchUrlScope": "ipv4-loopback-http-origin-only",
       "fixedExternalNavigationUrls": [
-        "https://github.com/hysel/haven-42/wiki/Model-And-Hardware-Test-Status",
         "https://github.com/hysel/haven-42/issues/new?template=alpha-bug-report.yml",
         "https://github.com/ollama/ollama/releases",
         "https://ollama.com/download/windows",
@@ -32,7 +31,7 @@
   },
   "browserPreferences": {
     "storageKey": "haven42.section-tours.v1",
-    "allowedFields": ["chat", "models", "system", "technical", "about"],
+    "allowedFields": ["chat", "models", "system", "about"],
     "allowedValueType": "positive-integer-tour-revision",
     "staleBooleanValuesTreatedAsUnseen": true,
     "newRevisionRetriggersOnlyChangedSection": true,
@@ -45,7 +44,7 @@
   },
   "lastSectionPreference": {
     "storageKey": "haven42.last-section.v1",
-    "allowedValues": ["text-panel", "models-panel", "system-panel", "assurance-panel", "about-panel"],
+    "allowedValues": ["text-panel", "models-panel", "system-panel", "about-panel"],
     "defaultValue": "text-panel",
     "conversationContentAllowed": false,
     "providerConfigurationAllowed": false,
@@ -174,7 +173,7 @@
     "maximumScreenshotDimension": 4096,
     "maximumScreenshotPixels": 16777216,
     "maximumScreenshotTotalPixels": 33554432,
-    "imageInputEvidence": "unverified-visible-warning",
+    "imageInputEvidence": "provider-capability-not-certification",
     "attachmentContentTreatedAsData": true,
     "contentDrivenProcessLaunchAllowed": false,
     "contentDrivenToolInvocationAllowed": false,

@@ -40,7 +40,6 @@ def main() -> int:
         "Choose for me · Recommended",
         "What Haven 42 will do · details",
         "Your permission is required",
-        "Technical test details",
         "Private session · no tracking",
     )
     for phrase in required_ui:
@@ -65,7 +64,6 @@ def main() -> int:
         ("chat", 6),
         ("models", 5),
         ("system", 6),
-        ("technical", 4),
         ("about", 4),
     ):
         assert f'data-tour-section="{section}"' in html, section
@@ -73,7 +71,7 @@ def main() -> int:
         tour_block = app.split(f'{section}: Object.freeze(', 1)[1].split("}),\n", 1)[0]
         assert tour_block.count("{ target:") == step_count, section
     assert 'id="energy-estimator-panel"' in html
-    assert "This estimates graphics-card electricity only" in html
+    assert "Automatic readings cover only the labeled GPU or CPU components" in html
     assert "does not detect your location or change your model choice" in html
     assert "Use the price from my electricity bill · most accurate" in html
     assert "Use an average U.S. household price" in html
@@ -198,7 +196,7 @@ def main() -> int:
     assert "Glossary.md\tCommon Words" in navigation
     assert "docs/wiki-glossary.md\tGlossary.md\tCommon Words" in sync
 
-    primary_html = html[: html.index('id="assurance-panel"')]
+    primary_html = html[: html.index('class="configuration-column"')]
     for expert_only in (
         "Request blocked:",
         "Repository access",

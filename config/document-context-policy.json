@@ -48,7 +48,7 @@
       "allowedMediaTypes": ["image/png"],
       "filePickerAllowed": true,
       "clipboardPasteAllowed": true,
-      "imageInputEvidence": "unverified-visible-warning"
+      "imageInputEvidence": "provider-capability-not-certification"
     }
   },
   "budgets": {

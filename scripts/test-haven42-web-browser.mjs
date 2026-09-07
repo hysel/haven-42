@@ -54,6 +54,7 @@ const chatPayloads = [];
 let cancelledChatConnections = 0;
 const providerAuthorization = [];
 let requiredOllamaAuthorization = null;
+let imageCapabilities = null;
 const trace = (message) => {
   if (process.env.HAVEN42_BROWSER_TEST_TRACE === "1") process.stderr.write(`[browser-test] ${message}\n`);
 };
@@ -99,6 +100,7 @@ const fake = createServer((request, response) => {
   request.on("data", (chunk) => { body += chunk; });
   request.on("end", () => {
     const payload = body ? JSON.parse(body) : {};
+    if (request.url === "/api/show") return json(response, 200, {capabilities: imageCapabilities});
     if (request.url === "/api/chat") {
       chatPayloads.push(payload);
       loaded.add(payload.model);
@@ -506,44 +508,29 @@ try {
   checks += 2;
   trace("welcome-verified");
 
-  await waitFor(() => cdp.evaluate("document.querySelector('#assurance-badge').textContent === 'Committed evidence'"));
-  const assurance = await cdp.evaluate(`({
-    badge: document.querySelector('#assurance-badge').textContent,
-    records: Number(document.querySelector('#assurance-record-count').textContent),
-    models: Number(document.querySelector('#assurance-model-count').textContent),
-    surfaces: Number(document.querySelector('#assurance-surface-count').textContent),
-    live: document.querySelector('#assurance-live-status').textContent,
-    statusRows: document.querySelectorAll('#assurance-status-list .assurance-status-item').length,
-    statusTotal: [...document.querySelectorAll('#assurance-status-list .assurance-status-item strong')].reduce((total, item) => total + Number(item.textContent), 0),
-    rows: document.querySelectorAll('#assurance-surface-list .assurance-item').length,
-    candidateRows: document.querySelectorAll('#assurance-surface-list .assurance-state.candidate').length,
-    activityDetails: [...document.querySelectorAll('#assurance-surface-list .assurance-item > div small')].every((item) => item.textContent.includes('supported') && item.textContent.includes('validated') && item.textContent.includes('blocked')),
-    wikiHref: document.querySelector('.assurance-wiki-link').href,
-    wikiTarget: document.querySelector('.assurance-wiki-link').target,
-    wikiRel: document.querySelector('.assurance-wiki-link').rel,
-    wikiReferrer: document.querySelector('.assurance-wiki-link').referrerPolicy,
-    disclosure: document.querySelector('#assurance-panel .field-help').textContent
+  const removedTechnical = await cdp.evaluate(`({
+    navigation: !document.querySelector('#assurance-nav'),
+    panel: !document.querySelector('#assurance-panel'),
+    tour: !Object.hasOwn(SECTION_TOURS, 'technical'),
+    route: !Object.hasOwn(PANEL_TOUR_SECTIONS, 'assurance-panel'),
   })`);
-  if (
-    assurance.badge !== "Committed evidence"
-    || assurance.records < 1
-    || assurance.models < 1
-    || assurance.surfaces !== 4
-    || assurance.live !== "Not run · read-only summary"
-    || assurance.statusRows < 1
-    || assurance.statusTotal !== assurance.records
-    || assurance.rows !== assurance.surfaces
-    || assurance.candidateRows !== 2
-    || !assurance.activityDetails
-    || assurance.wikiHref !== "https://github.com/hysel/haven-42/wiki/Model-And-Hardware-Test-Status"
-    || assurance.wikiTarget !== "_blank"
-    || !assurance.wikiRel.includes("noopener")
-    || !assurance.wikiRel.includes("noreferrer")
-    || assurance.wikiReferrer !== "no-referrer"
-    || !assurance.disclosure.includes("does not start AI")
-  ) throw new Error(`assurance-view:${JSON.stringify(assurance)}`);
-  checks += 17;
-  trace("assurance-view-verified");
+  if (Object.values(removedTechnical).some(value => !value)) throw new Error('technical-details-still-exposed');
+  checks += 4;
+
+  const retiredRoute = await cdp.evaluate(`(() => {
+    const saved = localStorage.getItem(LAST_SECTION_STORAGE_KEY);
+    try {
+      localStorage.setItem(LAST_SECTION_STORAGE_KEY, 'assurance-panel');
+      restoreLastSection();
+      return !document.querySelector('#text-panel').classList.contains('hidden')
+        && document.querySelector('#home-nav').getAttribute('aria-current') === 'page';
+    } finally {
+      if (saved === null) localStorage.removeItem(LAST_SECTION_STORAGE_KEY);
+      else localStorage.setItem(LAST_SECTION_STORAGE_KEY, saved);
+    }
+  })()`);
+  if (!retiredRoute) throw new Error('retired-technical-route-does-not-fall-back-to-chat');
+  checks += 1;
 
   const macosGuidedPresentation = await cdp.evaluate(`(() => {
     const originalPlatform = state.platformFamily;
@@ -1319,7 +1306,7 @@ try {
   })()`);
   if (
     !tourNavigation.progress.includes("Step 2 of 6")
-    || tourNavigation.title !== "See the model or change settings"
+    || tourNavigation.title !== "Choose your conversation model"
     || !tourNavigation.backEnabled
     || !tourNavigation.back.includes("Step 1 of 6")
     || tourNavigation.trappedFocus !== "section-tour-close"
@@ -1331,11 +1318,11 @@ try {
     focused: document.activeElement.id,
     backgroundInert: document.querySelector('.shell').inert,
   })`);
-  if (dismissedTour.state.chat !== 11 || dismissedTour.focused !== "capability-title" || dismissedTour.backgroundInert) {
+  if (dismissedTour.state.chat !== 13 || dismissedTour.focused !== "capability-title" || dismissedTour.backgroundInert) {
     throw new Error(`section-tour-dismissal:${JSON.stringify(dismissedTour)}`);
   }
-  const sectionTourCounts = {models: 5, system: 6, technical: 4, about: 4};
-  const sectionTourNavigation = {models: "models-nav", system: "system-nav", technical: "assurance-nav", about: "about-nav"};
+  const sectionTourCounts = {models: 5, system: 6, about: 4};
+  const sectionTourNavigation = {models: "models-nav", system: "system-nav", about: "about-nav"};
   for (const [section, expectedSteps] of Object.entries(sectionTourCounts)) {
     await cdp.evaluate(`document.querySelector('#${sectionTourNavigation[section]}').click()`);
     await waitFor(() => cdp.evaluate("!document.querySelector('#section-tour-layer').classList.contains('hidden')"));
@@ -1365,11 +1352,10 @@ try {
   if (!manualTour.visible || !manualTour.focused) throw new Error(`manual-section-tour:${JSON.stringify(manualTour)}`);
   const allTourState = await cdp.evaluate("JSON.parse(localStorage.getItem('haven42.section-tours.v1'))");
   if (
-    Object.values(allTourState).length !== 5
-    || allTourState.chat !== 11
+    Object.values(allTourState).length !== 4
+    || allTourState.chat !== 13
     || allTourState.models !== 6
-    || allTourState.system !== 5
-    || allTourState.technical !== 2
+    || allTourState.system !== 6
     || allTourState.about !== 2
   ) {
     throw new Error(`section-tour-state:${JSON.stringify(allTourState)}`);
@@ -1379,7 +1365,6 @@ try {
       chat: 'home-nav',
       models: 'models-nav',
       system: 'system-nav',
-      technical: 'assurance-nav',
       about: 'about-nav',
     };
     return Object.entries(navigation).map(([section, navigationId]) => {
@@ -1415,7 +1400,7 @@ try {
       stored: JSON.parse(localStorage.getItem('haven42.section-tours.v1')).chat,
     };
   })()`);
-  if (!staleBooleanTour.visible || staleBooleanTour.stored !== 11) {
+  if (!staleBooleanTour.visible || staleBooleanTour.stored !== 13) {
     throw new Error(`stale-boolean-section-tour:${JSON.stringify(staleBooleanTour)}`);
   }
   checks += 41;
@@ -1461,7 +1446,7 @@ try {
     || opened.settingsExpanded !== "false"
     || opened.currentModel !== "qwen3.5:9b"
     || opened.toolbarHeight > 84
-    || opened.chatHeight < 560
+    || opened.messagesHeight < 200
     || opened.messagesHeight < opened.toolbarHeight * 2
     || !opened.emptyState
   ) throw new Error(`chat-handoff:${JSON.stringify(opened)}`);
@@ -1824,7 +1809,82 @@ try {
   if (requests.length !== requestsBeforeUnchangedSubmit) throw new Error("unchanged-provider-reconnected");
   checks += 1;
 
+  const headerModelPicker = await cdp.evaluate(`(async () => {
+    const settings = document.querySelector('#conversation-settings');
+    settings.open = false;
+    const select = document.querySelector('#model');
+    const original = select.value;
+    const history = JSON.stringify(state.messages);
+    const rendered = document.querySelector('#messages').textContent;
+    const alternative = [...select.options].find(option => option.value.startsWith('manual:') && option.value !== original);
+    if (!alternative) throw new Error('missing-model-switch-fixture');
+    const trigger = document.querySelector('#chat-model-trigger');
+    const panel = document.querySelector('#chat-model-popover');
+    const box = trigger.getBoundingClientRect();
+    trigger.focus();
+    const result = {
+      visibleWithoutSettings: box.width > 0 && box.height >= 44 && !settings.open,
+      inHeaderOnly: Boolean(select.closest('.conversation-toolbar')) && !settings.contains(select) && document.querySelectorAll('#model').length === 1,
+      focusable: document.activeElement === trigger,
+      labeled: trigger.getAttribute('aria-label').startsWith('Conversation model:'),
+      nativeSelectHidden: select.hidden && select.getBoundingClientRect().height === 0,
+    };
+    trigger.click();
+    await new Promise(resolve => setTimeout(resolve, 60));
+    const search = document.querySelector('#chat-model-search');
+    result.searchFocused = document.activeElement === search;
+    search.value = 'no-such-model-xyz';
+    search.dispatchEvent(new Event('input'));
+    result.emptySearch = !document.querySelector('#chat-model-results button') && document.querySelector('#chat-model-result-count').textContent.includes('No matching');
+    search.value = alternative.value.slice('manual:'.length);
+    search.dispatchEvent(new Event('input'));
+    const row = [...document.querySelectorAll('#chat-model-results button')].find(row => row.querySelector('strong').textContent === search.value);
+    row.click();
+    result.closedAfterChoice = !panel.matches(':popover-open') && document.activeElement === trigger;
+    result.changed = selectedModel(state.capabilityId) === alternative.value.slice('manual:'.length) && document.querySelector('#model-selection-mode').textContent === 'Manual';
+    result.historyPreserved = JSON.stringify(state.messages) === history && document.querySelector('#messages').textContent === rendered;
+    select.value = original;
+    select.dispatchEvent(new Event('change', {bubbles: true}));
+    return result;
+  })()`);
+  if (Object.values(headerModelPicker).some(value => value !== true)) throw new Error('chat-header-model-picker:' + JSON.stringify(headerModelPicker));
+  checks += 10;
+  await cdp.evaluate("document.querySelector('#chat-model-trigger').click()");
+  await delay(60);
+  await cdp.call('Input.dispatchKeyEvent', {type: 'keyDown', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27});
+  await cdp.call('Input.dispatchKeyEvent', {type: 'keyUp', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27});
+  if (!await cdp.evaluate("!document.querySelector('#chat-model-popover').matches(':popover-open') && document.activeElement.id === 'chat-model-trigger'")) throw new Error('model-picker-escape-focus');
+  checks += 2;
   await cdp.evaluate("document.querySelector('#conversation-settings-trigger').click()");
+  await waitFor(() => cdp.evaluate("!modelSizeCheckActive"));
+  const metadataUi = await cdp.evaluate(`(async () => {
+    const originalApi = api;
+    const saved = [...knownModelSizes];
+    const calls = [];
+    try {
+      api = async (path, body) => {
+        if (path !== '/api/model-metadata') return originalApi(path, body);
+        calls.push(body);
+        return {sizes: Object.fromEntries(body.models.map(name => [name, {bytes: 123456789, source: 'ollama-catalog'}])), unavailable: [], cacheSaved: true};
+      };
+      await refreshModelSizes(true);
+      const name = calls[0]?.models[0];
+      return {
+        bounded: calls.length > 0 && calls.every(call => call.online === true && call.models.length <= 8 && Object.keys(call).sort().join('|') === 'models|online'),
+        sharedLabel: modelSizeLabel({name}).includes('123.46 MB'),
+        localPrecedence: modelSizeLabel({name, modelSize: {bytes: 200000000, source: 'ollama-installed'}}).includes('200 MB'),
+        announced: document.querySelector('#chat-model-size-status').textContent.includes('Size check complete'),
+        controlsRestored: !document.querySelector('#chat-model-size-check').disabled && !document.querySelector('#model-size-check').disabled,
+      };
+    } finally {
+      api = originalApi;
+      knownModelSizes.clear();
+      saved.forEach(([name, size]) => knownModelSizes.set(name, size));
+      renderModelDiscovery();
+    }
+  })()`);
+  if (Object.values(metadataUi).some(value => !value)) throw new Error('model-size-metadata-ui:' + JSON.stringify(metadataUi));
+  checks += 5;
   await waitFor(() => cdp.evaluate("document.querySelector('#conversation-settings-trigger').getAttribute('aria-expanded') === 'true'"));
   const modelLibraryAction = await cdp.evaluate(`(() => {
     const action = document.querySelector('#open-models-from-chat');
@@ -1868,9 +1928,6 @@ try {
     const technical = document.querySelector('#run-details');
     technical.classList.remove('hidden');
     const assistant = document.querySelector('.message.assistant');
-    const navLabel = document.querySelector('#assurance-nav .nav-label').getBoundingClientRect();
-    const navTag = document.querySelector('#assurance-nav .nav-tag');
-    const navTagRect = navTag.getBoundingClientRect();
     const researchStyle = getComputedStyle(research);
     const assistantStyle = getComputedStyle(assistant);
     const researchRect = research.getBoundingClientRect();
@@ -1883,9 +1940,6 @@ try {
       researchRadius: researchStyle.borderRadius,
       assistantBackground: assistantStyle.backgroundColor,
       assistantRadius: assistantStyle.borderRadius,
-      navTagText: navTag.textContent.trim(),
-      navTagBorder: getComputedStyle(navTag).borderTopWidth,
-      navTagBelowLabel: navTagRect.top >= navLabel.bottom,
       utilityControlsShareRow: Math.abs(researchRect.top - technicalRect.top) < 2,
       researchSummaryHeight,
       technicalSummaryHeight,
@@ -1896,16 +1950,13 @@ try {
     || remainingDesignFixes.researchRadius === "0px"
     || remainingDesignFixes.assistantBackground === "rgba(0, 0, 0, 0)"
     || remainingDesignFixes.assistantRadius === "0px"
-    || remainingDesignFixes.navTagText !== "Advanced"
-    || remainingDesignFixes.navTagBorder === "0px"
-    || !remainingDesignFixes.navTagBelowLabel
     || !remainingDesignFixes.utilityControlsShareRow
     || remainingDesignFixes.researchSummaryHeight < 44
     || remainingDesignFixes.researchSummaryHeight > 46
     || remainingDesignFixes.technicalSummaryHeight < 44
     || remainingDesignFixes.technicalSummaryHeight > 46
   ) throw new Error(`remaining-design-fixes:${JSON.stringify(remainingDesignFixes)}`);
-  checks += 10;
+  checks += 7;
 
   const dashboardTypography = await cdp.evaluate(`(() => {
     const size = (selector) => getComputedStyle(document.querySelector(selector)).fontSize;
@@ -2500,8 +2551,8 @@ try {
     || !result.runDetails.includes("40")
     || !result.runDetails.includes("2 tokens/s")
     || !result.runDetailsSummary.includes("Response completed in")
-    || result.messageActions.join('|') !== "Copy answer|Try again|Report this answer"
-    || result.messageActionIcons.length !== 3
+    || result.messageActions.join('|') !== "Copy answer|Try again"
+    || result.messageActionIcons.length !== 2
     || result.messageActionIcons.some((item) => item.ariaHidden !== "true" || item.focusable !== "false" || item.paths < 1)
     || result.assistantBackground === "rgba(0, 0, 0, 0)"
     || result.followGap > 48
@@ -2512,36 +2563,6 @@ try {
   checks += 18;
   trace("typed-result-verified");
 
-  const answerReportDisclosure = await cdp.evaluate(`(() => {
-    const report = [...document.querySelectorAll('.message-action')].at(-1);
-    if (!report) return null;
-    report.click();
-    return {
-      label: report.textContent,
-      panelVisible: !document.querySelector('#answer-report-panel').classList.contains('hidden'),
-      disclosure: document.querySelector('#answer-report-description').textContent,
-      status: document.querySelector('#answer-report-status').textContent,
-    };
-  })()`);
-  if (
-    !answerReportDisclosure
-    || answerReportDisclosure.label !== "Report this answer"
-    || !answerReportDisclosure.panelVisible
-    || !answerReportDisclosure.disclosure.includes("never includes the question, answer, or attachments")
-    || !answerReportDisclosure.disclosure.includes("nothing is uploaded")
-    || !answerReportDisclosure.status.includes("stays in Haven42-Logs")
-  ) throw new Error(`answer-report-disclosure:${JSON.stringify(answerReportDisclosure)}`);
-  await cdp.evaluate(`(() => {
-    document.querySelector('#answer-report-category').value = 'incorrect';
-    document.querySelector('#answer-report-note').value = 'The result appears factually incorrect.';
-    document.querySelector('#save-answer-report').click();
-  })()`);
-  await waitFor(() => cdp.evaluate(`(
-    document.querySelector('#answer-report-panel').classList.contains('hidden')
-    && document.querySelector('#task-event').textContent.includes('nothing uploaded')
-  )`));
-  checks += 7;
-  trace("answer-report-privacy-flow-verified");
 
   const manualScroll = await cdp.evaluate(`(() => {
     const messages = document.querySelector('#messages');
@@ -3326,6 +3347,16 @@ try {
   ) throw new Error(`context-cleanup:${JSON.stringify(contextAfterSend)}`);
   checks += 3;
 
+  const beforeEmptySend = chatPayloads.length;
+  const emptySend = await cdp.evaluate(`(() => {
+    const before = state.messages.length;
+    document.querySelector('#prompt').value = '   ';
+    document.querySelector('#text-form').requestSubmit();
+    return state.messages.length === before && state.activeTextExecution === null;
+  })()`);
+  if (!emptySend || chatPayloads.length !== beforeEmptySend) throw new Error('empty-message-without-screenshot-sent');
+  checks += 2;
+
   const screenshotPaste = await cdp.evaluate(`(() => {
     const encoded = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=';
     const bytes = Uint8Array.from(atob(encoded), (value) => value.charCodeAt(0));
@@ -3354,7 +3385,8 @@ try {
     || screenshotUi.alt !== "Screenshot 1: clipboard-screenshot-1.png"
     || !screenshotUi.status.includes("1 screenshot")
     || !screenshotUi.warningVisible
-    || !screenshotUi.warning.includes("has not confirmed")
+    || !screenshotUi.warning.includes("Image support is checked when you send")
+    || screenshotUi.warning.includes("has not confirmed")
   ) throw new Error(`screenshot-paste:${JSON.stringify({screenshotPaste, screenshotUi})}`);
   const advancedScreenshotLimit = await cdp.evaluate(`(async () => {
     const select = document.querySelector('#context-image-limit');
@@ -3438,7 +3470,7 @@ try {
   })()`);
   await waitFor(() => chatPayloads.length === chatRequestsBeforeScreenshot + 1);
   await waitFor(() => cdp.evaluate(
-    "document.querySelector('#task-event').textContent.includes('has not confirmed that this model can understand screenshots')",
+    "document.querySelector('#task-event').textContent.includes('provider did not report image capability')",
   ));
   const screenshotPayload = chatPayloads.at(-1);
   if (
@@ -3446,6 +3478,49 @@ try {
     || screenshotPayload.messages.at(-1).images.length !== 1
     || !screenshotPayload.messages.at(-1).images[0].startsWith("iVBOR")
   ) throw new Error("screenshot-provider-payload");
+  try {
+    for (const scenario of [
+      {capabilities: ["completion", "vision"], prompt: "", error: null},
+      {capabilities: ["completion", "vision"], prompt: "   ", error: null},
+      {capabilities: ["completion", "vision"], prompt: "supported image request", error: null},
+      {capabilities: ["completion"], prompt: "", error: "does not support images"},
+      {capabilities: ["completion"], prompt: "unsupported image request", error: "does not support images"},
+      {capabilities: null, prompt: "force browser failure", error: "could not complete this image request"},
+    ]) {
+      imageCapabilities = scenario.capabilities;
+      const previousCalls = chatPayloads.length;
+      await cdp.evaluate(`(() => {
+        document.querySelector('#prompt').value = ${JSON.stringify(scenario.prompt)};
+        document.querySelector('#text-form').requestSubmit();
+      })()`);
+      await waitFor(() => cdp.evaluate("state.activeTextExecution === null"));
+      const result = await cdp.evaluate(`({
+        images: state.contextImages.length,
+        prompt: document.querySelector('#prompt').value,
+        status: document.querySelector('#task-event').textContent,
+        lastUser: [...state.messages].reverse().find(item => item.role === 'user')?.content,
+      })`);
+      const expectedPrompt = scenario.prompt.trim() || 'Describe this screenshot and point out anything notable.';
+      if (scenario.error) {
+        if (result.images !== 1 || result.prompt !== expectedPrompt || !result.status.includes(scenario.error)) {
+          throw new Error('image-request-retention:' + JSON.stringify(result));
+        }
+      } else if (!result.status.includes('ready') || result.status.includes('did not report image capability')) {
+        throw new Error('supported-image-request:' + JSON.stringify(result));
+      }
+      if (!scenario.error) {
+        const sent = chatPayloads.at(-1).messages.at(-1);
+        if (sent.content !== expectedPrompt || sent.images?.length !== 1 || result.lastUser !== expectedPrompt) {
+          throw new Error('screenshot-default-prompt-not-sent-and-displayed:' + JSON.stringify({sent, result}));
+        }
+        checks += 3;
+      }
+      if (scenario.capabilities?.length === 1 && chatPayloads.length !== previousCalls) throw new Error('unsupported-image-sent');
+      checks += 3;
+    }
+  } finally {
+    imageCapabilities = null;
+  }
   const screenshotCleanup = await cdp.evaluate(`(() => {
     document.querySelector('.remove-context-image').click();
     return {
@@ -3529,12 +3604,45 @@ try {
     || attachmentLayout.composerBottomOverflow > 24
     || !attachmentLayout.composerIntegrated
     || !attachmentLayout.contextIntegrated
-    || attachmentLayout.contextHeight > 97
-    || !attachmentLayout.contextScrollable
-    || attachmentLayout.contextOverflow !== "auto"
+    || attachmentLayout.contextScrollable
+    || attachmentLayout.contextOverflow !== "visible"
     || attachmentLayout.messageMinHeight !== "0px"
     || !attachmentLayout.policyInsideSettings
   ) throw new Error(`attachment-layout:${JSON.stringify(attachmentLayout)}`);
+  // #177: expanding safety settings must not bring back a scrollbar around
+  // Attach files, or clip the toolbar when attached items wrap on narrow screens.
+  for (const width of [1400, 900, 480]) {
+    await cdp.call("Emulation.setDeviceMetricsOverride", {width, height: 700, deviceScaleFactor: 1, mobile: false});
+    for (const open of [false, true]) {
+      const layout = await cdp.evaluate(`(() => {
+        const settings = document.querySelector('.context-settings');
+        settings.open = ${open};
+        settings.scrollTop = 0;
+        const summary = settings.querySelector('summary');
+        summary.focus();
+        const context = document.querySelector('.context-panel');
+        const box = context.getBoundingClientRect();
+        const picker = document.querySelector('#browse-context').getBoundingClientRect();
+        const summaryBox = summary.getBoundingClientRect();
+        return {
+          outerScroll: context.scrollHeight > context.clientHeight + 1,
+          horizontalOverflow: context.scrollWidth > context.clientWidth + 1,
+          pickerVisible: picker.top >= box.top && picker.bottom <= box.bottom && picker.height >= 44,
+          summaryVisible: summaryBox.top >= box.top && summaryBox.bottom <= box.bottom,
+          settingsFocused: document.activeElement === summary,
+          settingsBounded: !settings.open || settings.clientHeight <= 280,
+        };
+      })()`);
+      if (layout.outerScroll || layout.horizontalOverflow || !layout.pickerVisible
+        || !layout.summaryVisible || !layout.settingsFocused || !layout.settingsBounded) {
+        throw new Error(`attachment-settings-layout:${JSON.stringify({width, open, layout})}`);
+      }
+      checks += 6;
+    }
+  }
+  await cdp.evaluate("document.querySelector('.context-settings').open = false");
+  await cdp.call("Emulation.clearDeviceMetricsOverride");
+  await delay(50);
   const documentContextBrowseCleanup = await cdp.evaluate(`(() => {
     document.querySelector('#clear-context').click();
     return {
@@ -3552,6 +3660,264 @@ try {
   }
   checks += 17;
   trace("document-context-verified");
+
+  // Regressions #176–178: test rendered geometry, not just CSS declarations.
+  for (const viewport of [{width: 1280, height: 580}, {width: 900, height: 700}, {width: 480, height: 700}]) {
+    await cdp.call("Emulation.setDeviceMetricsOverride", {...viewport, deviceScaleFactor: 1, mobile: false});
+    const geometry = await cdp.evaluate(`(() => {
+      const context = document.querySelector('.context-panel');
+      const box = context.getBoundingClientRect();
+      const picker = document.querySelector('#browse-context').getBoundingClientRect();
+      const settings = document.querySelector('#conversation-settings-trigger').getBoundingClientRect();
+      const help = document.querySelector('[data-tour-section="chat"]').getBoundingClientRect();
+      const modelBox = document.querySelector('#chat-model-trigger').getBoundingClientRect();
+      document.querySelector('#about-nav').click();
+      const link = document.querySelector('.alpha-reporting a.button');
+      const linkBox = link.getBoundingClientRect();
+      const range = document.createRange(); range.selectNodeContents(link);
+      const textBox = range.getBoundingClientRect();
+      const result = {
+        toolbarVisible: context.scrollHeight <= context.clientHeight + 1 && picker.top >= box.top && picker.bottom <= box.bottom,
+        helpCenterDelta: Math.abs((help.top + help.bottom - settings.top - settings.bottom) / 2),
+        modelVisible: modelBox.height >= 44 && modelBox.width >= 100 && modelBox.left >= 0 && modelBox.right <= innerWidth,
+        linkCenterDelta: Math.abs((linkBox.top + linkBox.bottom - textBox.top - textBox.bottom) / 2),
+        targets: picker.height >= 44 && help.height >= 44 && settings.height >= 44 && linkBox.height >= 44,
+        heights: {picker: picker.height, help: help.height, link: linkBox.height},
+      };
+      document.querySelector('#home-nav').click();
+      return result;
+    })()`);
+    if (!geometry.toolbarVisible || !geometry.targets || !geometry.modelVisible || geometry.helpCenterDelta > 2 || geometry.linkCenterDelta > 3) {
+      throw new Error('feedback-control-geometry:' + JSON.stringify({viewport, geometry}));
+    }
+    checks += 5;
+  }
+  await cdp.call("Emulation.clearDeviceMetricsOverride");
+
+  // #178: the aligned controls retain their native keyboard order.
+  await cdp.evaluate("document.querySelector('#conversation-settings').open = false; document.querySelector('#conversation-settings-trigger').focus()");
+  await cdp.call("Input.dispatchKeyEvent", {type: "keyDown", key: "Tab", code: "Tab"});
+  await cdp.call("Input.dispatchKeyEvent", {type: "keyUp", key: "Tab", code: "Tab"});
+  if (!await cdp.evaluate("document.activeElement === document.querySelector('[data-tour-section=\"chat\"]')")) {
+    throw new Error("chat-settings-help-tab-order");
+  }
+  await cdp.call("Input.dispatchKeyEvent", {type: "keyDown", key: "Tab", code: "Tab", modifiers: 8});
+  await cdp.call("Input.dispatchKeyEvent", {type: "keyUp", key: "Tab", code: "Tab", modifiers: 8});
+  if (!await cdp.evaluate("document.activeElement.id === 'conversation-settings-trigger'")) {
+    throw new Error("chat-help-settings-reverse-tab-order");
+  }
+  checks += 2;
+
+  // #180: research must not compress either the welcome card or message history.
+  for (const viewport of [{width: 1890, height: 835}, {width: 1280, height: 580}, {width: 480, height: 700}]) {
+    await cdp.call("Emulation.setDeviceMetricsOverride", {...viewport, deviceScaleFactor: 1, mobile: false});
+    await delay(50);
+    const layout = await cdp.evaluate(`(() => {
+      const messages = document.querySelector('#messages');
+      const research = document.querySelector('#research-tools');
+      const children = [...messages.childNodes];
+      const className = messages.className;
+      const wasOpen = research.open;
+      const scrollTop = messages.scrollTop;
+      try {
+        research.open = true;
+        messages.classList.add('empty-conversation');
+        const welcome = document.createElement('article');
+        welcome.className = 'message assistant';
+        const avatar = document.createElement('div');
+        avatar.className = 'avatar';
+        avatar.textContent = '42';
+        const content = document.createElement('div');
+        const title = document.createElement('strong');
+        title.textContent = 'Haven 42';
+        const paragraph = document.createElement('p');
+        paragraph.textContent = 'Ask a question, draft content, or summarize material here. The conversation stays in memory until you start a new task or close Haven 42.';
+        content.append(title, paragraph);
+        welcome.append(avatar, content);
+        messages.replaceChildren(welcome);
+        const box = messages.getBoundingClientRect();
+        const card = welcome.getBoundingClientRect();
+        const researchBox = research.getBoundingClientRect();
+        const composer = document.querySelector('#text-form').getBoundingClientRect();
+        const result = {
+          welcomeVisible: card.top >= box.top && card.bottom <= box.bottom,
+          welcomeNotScrollable: messages.scrollHeight <= messages.clientHeight + 1,
+          welcomeGeometry: {height: box.height, cardHeight: card.height, overflow: getComputedStyle(messages).overflowY, cardTop: card.top - box.top},
+          noOverlap: researchBox.top >= box.bottom - 1 && composer.top >= researchBox.bottom - 1,
+          noHorizontalOverflow: document.documentElement.scrollWidth <= innerWidth + 1,
+        };
+        messages.classList.remove('empty-conversation');
+        messages.replaceChildren(...Array.from({length: 20}, () => welcome.cloneNode(true)));
+        result.historyHeight = messages.clientHeight;
+        messages.scrollTop = messages.scrollHeight;
+        result.historyCanScroll = messages.scrollTop > 0;
+        return result;
+      } finally {
+        messages.replaceChildren(...children);
+        messages.className = className;
+        messages.scrollTop = scrollTop;
+        research.open = wasOpen;
+      }
+    })()`);
+    if (!layout.welcomeVisible || !layout.welcomeNotScrollable || !layout.noOverlap
+      || !layout.noHorizontalOverflow || layout.historyHeight < 200 || !layout.historyCanScroll) {
+      throw new Error('research-conversation-layout:' + JSON.stringify({viewport, layout}));
+    }
+    checks += 6;
+  }
+  await cdp.call("Emulation.clearDeviceMetricsOverride");
+  await delay(50);
+
+  // #183: effective CSS viewports cover zoom reflow, not just pixel density.
+  // Exercise every public page, including the in-between widths where grids
+  // change shape. Native packaged/OS zoom remains a separate manual check.
+  for (const viewport of [
+    {width: 2400, height: 1150}, {width: 1920, height: 920},
+    {width: 1280, height: 614}, {width: 960, height: 460},
+    {width: 901, height: 700}, {width: 760, height: 600},
+    {width: 480, height: 700}, {width: 320, height: 568},
+    {width: 960, height: 700, textScale: true},
+  ]) {
+    await cdp.call("Emulation.setDeviceMetricsOverride", {width: viewport.width, height: viewport.height, deviceScaleFactor: 1, mobile: false});
+    await cdp.evaluate(`document.documentElement.style.fontSize = ${viewport.textScale ? "'200%'" : "''"}`);
+    for (const page of ['home', 'models', 'system', 'about']) {
+      await cdp.evaluate(`document.querySelector('#${page}-nav').click()`);
+      await delay(80);
+      const geometry = await cdp.evaluate(`(() => {
+        const overflow = [...document.querySelectorAll('.workspace button, .workspace input, .workspace select, .workspace summary')]
+          .filter(el => el.getClientRects().length && !el.closest('.hidden, [hidden]') && !el.closest('details:not([open]) :not(summary)'))
+          .filter(el => { const r = el.getBoundingClientRect(); return r.left < -1 || r.right > innerWidth + 1; })
+          .map(el => el.id || el.className);
+        return {width: document.documentElement.scrollWidth, viewport: innerWidth, overflow};
+      })()`);
+      if (geometry.width > geometry.viewport + 1 || geometry.overflow.length) {
+        throw new Error('shared-page-reflow:' + JSON.stringify({viewport, page, geometry}));
+      }
+      checks += 2;
+      if (page === 'home') {
+        await cdp.evaluate("document.querySelector('#chat-model-trigger').click()");
+        await delay(60);
+        const pickerFits = await cdp.evaluate(`(() => {
+          const panel = document.querySelector('#chat-model-popover');
+          const box = panel.getBoundingClientRect();
+          const fits = {open: panel.matches(':popover-open'), left: box.left, right: box.right, top: box.top, bottom: box.bottom,
+            scroll: panel.scrollWidth, client: panel.clientWidth, disabled: document.querySelector('#chat-model-trigger').disabled};
+          panel.hidePopover();
+          return fits;
+        })()`);
+        if (!pickerFits.open || pickerFits.left < 0 || pickerFits.right > viewport.width || pickerFits.top < 0
+          || pickerFits.bottom > viewport.height + 1 || pickerFits.scroll > pickerFits.client + 1) throw new Error('model-picker-viewport:' + JSON.stringify({viewport, pickerFits}));
+        checks += 1;
+      }
+    }
+  }
+  await cdp.evaluate("document.documentElement.style.fontSize = ''");
+  await cdp.call("Emulation.clearDeviceMetricsOverride");
+  await cdp.evaluate("document.querySelector('#home-nav').click()");
+  await delay(80);
+
+  const resizeState = await cdp.evaluate(`(async () => {
+    const messages = document.querySelector('#messages');
+    const research = document.querySelector('#research-tools');
+    const model = document.querySelector('#model');
+    const children = [...messages.childNodes];
+    const className = messages.className;
+    const wasOpen = research.open;
+    const follow = state.chatAutoFollow;
+    const originalScroll = messages.scrollTop;
+    const option = model.selectedOptions[0];
+    const label = option.textContent;
+    try {
+      messages.classList.remove('empty-conversation');
+      messages.replaceChildren(...Array.from({length: 40}, () => {
+        const row = document.createElement('p');
+        row.textContent = 'A long conversation must preserve the reader position when controls expand.';
+        return row;
+      }));
+      option.textContent = 'organisation/very-long-model-family-name-and-quantization-label'.repeat(5);
+      state.chatAutoFollow = false;
+      messages.scrollTop = 100;
+      document.querySelector('#chat-model-trigger').focus({preventScroll: true});
+      research.open = true;
+      await new Promise(resolve => setTimeout(resolve, 100));
+      return {
+        focusPreserved: document.activeElement.id === 'chat-model-trigger',
+        readingPositionPreserved: Math.abs(messages.scrollTop - 100) < 2,
+        historyUsable: messages.clientHeight >= 200,
+        noOverflow: document.documentElement.scrollWidth <= innerWidth + 1,
+      };
+    } finally {
+      messages.replaceChildren(...children);
+      messages.className = className;
+      research.open = wasOpen;
+      option.textContent = label;
+      state.chatAutoFollow = follow;
+      messages.scrollTop = originalScroll;
+    }
+  })()`);
+  if (Object.values(resizeState).some(value => !value)) throw new Error('responsive-state-preservation:' + JSON.stringify(resizeState));
+  checks += 4;
+
+  const powerUi = await cdp.evaluate(`(() => {
+    const button = document.querySelector('#energy-use-measured');
+    const watts = document.querySelector('#energy-average-watts');
+    const report = {};
+    const sample = (stamp, value, scope = 'nvidia-gpus', source = 'nvidia-smi') => ({sampledAtMonotonicMs: stamp, power: {watts: value, scope, source}});
+    renderPowerMeasurement(null);
+    report.unavailable = button.classList.contains('hidden') && document.querySelector('#energy-live-power').classList.contains('hidden');
+    report.noSelector = !document.querySelector('#energy-measurement-profile');
+    watts.value = '99';
+    renderPowerMeasurement(sample(1000, 20));
+    report.singleNotAverage = button.classList.contains('hidden');
+    renderPowerMeasurement(sample(5000, 40));
+    report.averageReady = !button.classList.contains('hidden') && watts.value === '99';
+    button.click();
+    report.gpuAverage = watts.value === '30.000' && energyMeasurementScope === 'NVIDIA GPU power only';
+    renderPowerMeasurement(sample(7000, 10, 'cpu-packages', 'linux-rapl'));
+    report.scopeResets = button.classList.contains('hidden');
+    renderPowerMeasurement(sample(11000, 20, 'cpu-packages', 'linux-rapl'));
+    button.click();
+    report.cpuAverage = watts.value === '15.000' && energyMeasurementScope === 'CPU package power only';
+    document.querySelector('#energy-rate-source').value = 'manual';
+    updateEnergyRateControls();
+    document.querySelector('#energy-country').value = 'US';
+    document.querySelector('#energy-currency').value = 'USD';
+    document.querySelector('#energy-rate').value = '0.2';
+    document.querySelector('#energy-hours-per-day').value = '2';
+    document.querySelector('#energy-billing-days').value = '30';
+    document.querySelector('#energy-pin-status').checked = true;
+    document.querySelector('#energy-estimator-form').requestSubmit();
+    report.costScope = document.querySelector('#energy-estimate-usage').textContent.includes('0.900 kWh')
+      && document.querySelector('#status-energy-period').textContent.includes('CPU package power only');
+    renderPowerMeasurement(sample(50000, 20, 'cpu-packages', 'linux-rapl'));
+    report.staleResets = button.classList.contains('hidden');
+    for (const value of [null, -1, NaN, Infinity, 2001, '20']) {
+      renderPowerMeasurement(sample(52000, value));
+      if (!button.classList.contains('hidden') || !document.querySelector('#energy-live-power').classList.contains('hidden')) throw new Error('invalid-power-shown');
+    }
+    renderPowerMeasurement(sample(54000, 0));
+    renderPowerMeasurement(sample(58000, 0));
+    report.zeroValid = !button.classList.contains('hidden');
+    watts.value = '75';
+    watts.dispatchEvent(new Event('input', {bubbles: true}));
+    report.manualResets = energyMeasurementScope === 'Entered measurement' && state.energyEstimate === null
+      && document.querySelector('#status-energy-widget').classList.contains('hidden');
+    renderPowerMeasurement(null);
+    report.failureKeepsEntry = watts.value === '75';
+    for (const platform of ['windows', 'linux', 'macos']) {
+      renderAlphaMetrics({schemaVersion: 1, kind: platform + '-alpha-local-metrics', persisted: false, externalTelemetryUsed: false,
+        sample: {...sample(60000, 12), persisted: false}, sessionTokens: {persisted: false, totalTokens: 0}});
+      if (document.querySelector('#energy-live-power').classList.contains('hidden')) throw new Error('platform-power-not-rendered:' + platform);
+    }
+    renderPowerMeasurement(null);
+    watts.value = '';
+    document.querySelector('#energy-rate').value = '';
+    document.querySelector('#energy-pin-status').checked = false;
+    syncEnergyStatusWidget();
+    return report;
+  })()`);
+  if (Object.values(powerUi).some(value => value !== true)) throw new Error('power-measurement-ui:' + JSON.stringify(powerUi));
+  checks += Object.keys(powerUi).length + 9;
 
   const alphaHiddenCapabilities = await cdp.evaluate(`({
     softwareNavHidden: document.querySelector('#software-nav').classList.contains('hidden'),
@@ -3621,24 +3987,15 @@ try {
       uninstallLabel: document.querySelector('#remove-managed-components').textContent,
       uninstallDisabled: document.querySelector('#remove-managed-components').disabled,
     };
-    document.querySelector('#assurance-nav').click();
-    const assurance = {
-      active: document.querySelector('#assurance-nav').classList.contains('active'),
-      visible: !document.querySelector('#assurance-panel').classList.contains('hidden'),
-      modelsHidden: document.querySelector('#models-panel').classList.contains('hidden'),
-      focused: document.activeElement.id,
-      rows: document.querySelectorAll('#assurance-surface-list .assurance-item').length,
-    };
     document.querySelector('#about-nav').click();
     const about = {
       active: document.querySelector('#about-nav').classList.contains('active'),
       visible: !document.querySelector('#about-panel').classList.contains('hidden'),
       modelsHidden: document.querySelector('#models-panel').classList.contains('hidden'),
-      assuranceHidden: document.querySelector('#assurance-panel').classList.contains('hidden'),
       focused: document.activeElement.id,
       version: document.querySelector('#about-version').textContent,
     };
-    return {reducedMotion, models, system, assurance, about};
+    return {reducedMotion, models, system, about};
   })()`);
   const localSetupUnavailable = navigation.system.localSetupLabel === "Local setup unavailable on this system";
   const localSetupChecking = navigation.system.localSetupLabel === "Checking local setup…"
@@ -3670,15 +4027,9 @@ try {
     || !navigation.system.diagnosticPrivacy.includes("never recorded or uploaded")
     || navigation.system.maintenanceHeading !== "Local AI on this computer"
     || !localSetupControlsValid
-    || !navigation.assurance.active
-    || !navigation.assurance.visible
-    || !navigation.assurance.modelsHidden
-    || navigation.assurance.focused !== "assurance-title"
-    || navigation.assurance.rows !== 4
     || !navigation.about.active
     || !navigation.about.visible
     || !navigation.about.modelsHidden
-    || !navigation.about.assuranceHidden
     || navigation.about.focused !== "about-title"
     || !navigation.about.version.startsWith("v")
   ) throw new Error(`accessible-navigation:${JSON.stringify(navigation)}`);
