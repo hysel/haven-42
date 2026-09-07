@@ -1,53 +1,66 @@
 # Quick Start
 
-_For first-time Windows Alpha users and developers starting from source on
-Windows, Linux, or macOS. Current packages are unsigned development software._
+_Start with the Alpha 2 portable package for Windows x64, Linux x64 or Apple Silicon._
 
-The public beginner package currently supports Windows 11 x64. You won't need
-Python, graphics tuning, model-format knowledge, or server administration.
-Linux and macOS do not yet have a public beginner package; those steps run
-reviewed source with Python 3 and are for developers.
+The packages include Python; you do not need to install Python to use them.
+These are experimental prereleases. Read the [release notes and testing
+limitations](https://github.com/hysel/haven-42/releases/tag/v0.4.0-alpha.2).
 
 ## Before you begin
 
 Pick one route:
 
-- **Windows portable package · Recommended:** download
-  [`haven42-0.4.0-alpha.1-windows-x64-unsigned.zip`](https://github.com/hysel/haven-42/releases/download/v0.4.0-alpha.1/haven42-0.4.0-alpha.1-windows-x64-unsigned.zip)
-  and its [published checksum file](https://github.com/hysel/haven-42/releases/download/v0.4.0-alpha.1/haven42-0.4.0-alpha.1-windows-x64-unsigned.zip.sha256)
-  from the official Alpha 1 release. Get both files from the Haven 42
-  repository, not a mirror.
+- **Portable package:** choose your platform below and download the
+  [checksum file](https://github.com/hysel/haven-42/releases/download/v0.4.0-alpha.2/SHA256SUMS.txt)
+  from the same official release.
 - **Source · Advanced:** for developers who already have Python 3 and a reviewed
   copy of this repository.
 
-Ollama is the local AI engine that runs the model. Windows guided setup can put
+| Computer | Download | Signing |
+| --- | --- | --- |
+| Windows x64 | [ZIP](https://github.com/hysel/haven-42/releases/download/v0.4.0-alpha.2/haven42-0.4.0-alpha.2-windows-x64-signed.zip) | Signed launcher |
+| Linux x64 | [tar.gz](https://github.com/hysel/haven-42/releases/download/v0.4.0-alpha.2/haven42-0.4.0-alpha.2-linux-x64-unsigned.tar.gz) | Unsigned |
+| Apple Silicon | [ZIP](https://github.com/hysel/haven-42/releases/download/v0.4.0-alpha.2/haven42-0.4.0-alpha.2-macos-arm64-signed-notarized.zip) | Signed and notarized |
+
+Intel Macs and Windows/Linux ARM64 are not included.
+
+Ollama is the local AI engine that runs the model. Windows and Linux guided setup can put
 the tested portable Ollama files and a suitable model inside the extracted
 Haven 42 folder, but it lists the downloads and waits for approval first.
+On macOS, install Ollama separately first. Once connected, setup can download
+the recommended model after approval on all three platforms.
 
-## Start the portable Windows package · Recommended
+## Start the portable package
 
-1. In PowerShell, check the ZIP before opening it:
+1. Check the archive's SHA-256 against its entry in `SHA256SUMS.txt`. For Windows:
 
    ```powershell
-   Get-FileHash -Algorithm SHA256 .\haven42-0.4.0-alpha.1-windows-x64-unsigned.zip
+   Get-FileHash -Algorithm SHA256 .\haven42-0.4.0-alpha.2-windows-x64-signed.zip
    ```
 
-   The complete SHA-256 value must be
-   `d1648667807dde37c645beb2199503b8a4852a585a2f62eb4ebe2c0b90465106`.
-   Stop and delete the ZIP if it differs.
-2. Extract the complete ZIP into a folder you own. Do not run it from inside
-   the ZIP.
+   On Linux, use `sha256sum <archive-name>`; on macOS, use
+   `shasum -a 256 <archive-name>`, replacing the placeholder with the downloaded
+   filename. Do not run a package if the complete checksum differs.
+2. Extract the complete archive into a folder you own. Do not run it from inside
+   the archive.
 3. Keep every extracted file together.
-4. Run `haven42.exe`.
+4. Run `haven42.exe` on Windows, `haven42` on Linux, or `Haven 42.app` on macOS.
 5. Choose **Set up this computer · Recommended**.
 6. Review the computer check and the list of downloads.
 7. Check the permission box only if you agree, then choose **Approve and
    continue**.
 8. Wait for every item to say **Complete**, then open Chat.
 
-Windows will warn that this Alpha package isn't digitally signed. That's
-expected for invited testing; stop if the file didn't come from your trusted
-Haven 42 test source.
+Signing does not guarantee that an operating system will show no warning.
+Do not disable security protections to open an unexpected or unverified file.
+
+### If you are following an older Alpha 1 guide
+
+The earlier guide began "For first-time Windows Alpha users" and said
+"Linux and macOS do not yet have a public beginner package". Those statements
+describe Alpha 1, not Alpha 2. Use the three-platform downloads above for the
+current prerelease; Alpha 1's unsigned Windows archive remains available in its
+[historical release](https://github.com/hysel/haven-42/releases/tag/v0.4.0-alpha.1).
 
 ## Start from source
 

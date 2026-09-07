@@ -1785,7 +1785,7 @@ Invoke-PackTest "agent prompt rule and template contracts are enforced" {
     Assert-True -Condition ($promptQuality -match "Execution And Evidence Contract") -Message "Prompt quality docs should define the execution contract."
     Assert-True -Condition ($bannedPatterns -match "pseudo function calls") -Message "Banned patterns should reject printed tool syntax."
     Assert-True -Condition ($languageRules -match "evidence-gated \.NET, ASP.NET Core, and API rules") -Message "Language rule docs should describe default rule loading accurately."
-    Assert-True -Condition ($readme -match 'Version `0\.3\.0`') -Message "README should report the current pack version."
+    Assert-True -Condition ($readme -match 'https://github\.com/hysel/haven-42/releases/tag/') -Message "README should link to a published release."
 }
 Invoke-PackTest "sample repository factory creates expected fixtures" {
     $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) "sample-factory-test-$([guid]::NewGuid())"

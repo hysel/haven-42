@@ -2,6 +2,11 @@
 
 **Your private, local AI station.**
 
+**[Download Alpha 2 — Windows, Linux and Apple Silicon](https://github.com/hysel/haven-42/releases/tag/v0.4.0-alpha.2)**
+
+Portable packages, checksums and changes since Alpha 1 are attached to the release.
+Alpha 2 is experimental software, published as a GitHub prerelease.
+
 Private AI that runs on hardware you control.
 
 [Get started](https://github.com/hysel/haven-42/wiki/Quick-Start) ·
@@ -18,13 +23,14 @@ There is no Haven 42 account or hosted chat service. The app does not silently
 download a model: it shows what is needed, where files will be stored, and asks
 before downloading anything.
 
-> **Development notice:** Current packages are unsigned test builds. Windows
-> or macOS may display a security warning. Use only a package from a trusted
-> Haven 42 test source.
+> **Alpha 2:** The Windows launcher is signed; the Apple Silicon app is signed
+> and notarized. The Linux archive is unsigned. Verify the published checksums.
+> Incomplete validation coverage and deferred manual accessibility testing are
+> disclosed in the release notes; this is not a production-ready release.
 
-Version `0.3.0` is the current stable release line. See the
-[code signing policy](CODE-SIGNING-POLICY.md) for why development packages are
-currently unsigned.
+See the
+[code signing policy](CODE-SIGNING-POLICY.md) for signing scope and the distinction
+between historical development packages and the published Alpha 2 artifacts.
 
 ## What you can do
 
@@ -33,8 +39,8 @@ currently unsigned.
 - Choose another installed model or search Ollama's public model catalog.
 - Attach bounded text, source-code, structured-text, and PNG screenshot files.
 - Connect to Ollama on the same computer or on a private server.
-- In the development source, review and approve a web search before any query
-  leaves your computer. The published Alpha 1 package predates this feature.
+- Review and approve a web search before any query leaves your computer.
+  Alpha 2 includes this feature; Alpha 1 predates it.
 - See response speed and local CPU, memory, and graphics use.
 
 Music and video generation are not part of the current app. Conversation
@@ -50,11 +56,16 @@ The wiki contains the single maintained setup path:
 2. Continue with [Using Haven 42](https://github.com/hysel/haven-42/wiki/Using-Haven-42).
 3. If something goes wrong, open [Troubleshooting](https://github.com/hysel/haven-42/wiki/Troubleshooting).
 
-The latest public test build is the unsigned Windows `0.4.0-alpha.1`
-prerelease. It is available from the
-[Alpha 1 release](https://github.com/hysel/haven-42/releases/tag/v0.4.0-alpha.1).
-The [Windows download guide](docs/windows-alpha-download-and-feedback.md)
-explains how to verify the package and report a problem safely.
+The latest public test build is **`0.4.0-alpha.2`**:
+
+- [Windows x64 — signed ZIP](https://github.com/hysel/haven-42/releases/download/v0.4.0-alpha.2/haven42-0.4.0-alpha.2-windows-x64-signed.zip)
+- [Linux x64 — unsigned tar.gz](https://github.com/hysel/haven-42/releases/download/v0.4.0-alpha.2/haven42-0.4.0-alpha.2-linux-x64-unsigned.tar.gz)
+- [Apple Silicon — signed and notarized ZIP](https://github.com/hysel/haven-42/releases/download/v0.4.0-alpha.2/haven42-0.4.0-alpha.2-macos-arm64-signed-notarized.zip)
+- [SHA-256 checksums](https://github.com/hysel/haven-42/releases/download/v0.4.0-alpha.2/SHA256SUMS.txt)
+
+Extract the complete archive into a folder you own. Model weights are separate
+downloads, approved during setup. Intel Macs and Windows/Linux ARM64 are not included.
+[Alpha 1](https://github.com/hysel/haven-42/releases/tag/v0.4.0-alpha.1) remains available as an older release.
 
 ## Privacy and safety
 

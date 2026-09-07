@@ -28,13 +28,14 @@ runtime, operating system, and hardware—not every similar computer.
 
 ## Releases
 
-The latest public test build is the unsigned Windows `0.4.0-alpha.1`
-prerelease. The latest stable release line is `0.3.0`. Changes in the source
-repository are not a release until they are deliberately packaged and
-verified.
+The latest public test build is [Alpha 2 (`0.4.0-alpha.2`)](https://github.com/hysel/haven-42/releases/tag/v0.4.0-alpha.2),
+published September 7, 2026 (UTC), with Windows x64, Linux x64 and Apple Silicon
+packages. The stable release line remains `0.3.0`.
 
-Current development packages are unsigned. Windows or macOS may warn before
-opening them, so use only files from a trusted Haven 42 test source.
+Alpha 2's Windows launcher is signed and its Apple Silicon app is signed and
+notarized. Linux is unsigned. The release includes checksums and documents
+incomplete final native validation and deferred manual accessibility testing.
+It is experimental software, not a production-ready or universally compatible release.
 
 ## Privacy, security, and accessibility
 
