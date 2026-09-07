@@ -143,6 +143,13 @@ def main() -> int:
             checks += 1
 
     print(f"Alpha 2 promotion readiness hostile tests passed: {checks} checks.")
+    final_spec = importlib.util.spec_from_file_location(
+        "alpha2_final_tests", ROOT / "scripts" / "test-alpha2-final-release.py",
+    )
+    final_tests = importlib.util.module_from_spec(final_spec)
+    assert final_spec.loader is not None
+    final_spec.loader.exec_module(final_tests)
+    assert final_tests.main() == 0
     return 0
 
 

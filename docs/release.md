@@ -1,5 +1,10 @@
 # Release Guidance
 
+For the approved signed three-platform Alpha 2 release, use
+[Alpha 2 final publication](#alpha-2-final-publication). The paragraph below
+records the earlier candidate-only stage; it does not prohibit a separately
+reviewed and owner-approved final release.
+
 Haven 42's public downloads remain unsigned development artifacts. Review the
 [Code signing policy](https://github.com/hysel/haven-42/blob/main/CODE-SIGNING-POLICY.md)
 before proposing any signature or public binary publication. A protected,
@@ -12,6 +17,38 @@ neither this guidance nor an artifact attestation grants publication authority.
 This document defines the release process for Haven 42.
 
 The release process is intentionally lightweight because this repository is configuration and documentation heavy, but each release should still be validated, versioned, tagged, and documented.
+
+## Alpha 2 final publication
+
+Keep the signed application source frozen while reviewing release metadata.
+`config/alpha-2-promotion-readiness.json` remains a historical preparation
+snapshot. Do not flip its denied flags or treat a successful snapshot-validation
+exit code as permission to publish. Use the separate final-evidence path:
+
+```text
+python scripts/evaluate-alpha2-promotion-readiness.py --final-record config/alpha-2-final-release-evidence.json --artifact-directory dist/alpha2-release
+```
+
+The final record identifies every archive, its SHA-256 and size, exact source
+commit, platform trust results, and hash-pinned reviewed evidence. The validator
+checks those bytes and requires the approved native cells, security/privacy and
+supply-chain reviews, release documentation, and source/digest-bound owner
+approval. Without the archive directory, publication remains denied. Missing,
+failed or blocked assessments stay blockers. Evidence contents and current
+hosted checks still require review; hashes alone do not prove test execution.
+
+The owner's deferral of remaining manual accessibility testing is recorded as
+`deferred-not-run`, never passed. Disclose it in release notes. A known
+accessibility regression remains a blocker and cannot use this exception.
+
+Preserve Alpha 1's tag and assets. Publish Alpha 2 as a GitHub prerelease with
+the Windows signed ZIP, Linux unsigned tar.gz, Apple Silicon signed/notarized
+ZIP, checksums, inventories, notices, SBOMs, provenance, validation evidence,
+known limitations and changes since Alpha 1. Review the exact staged metadata
+tree with Full, security review, wiki synchronization and hosted CI before
+publication. Publish only after `PublicationAllowed` is true and the owner has
+approved the final release. Download the published assets again and verify
+their hashes. Never claim a draft or an Actions artifact is a published release.
 
 ## Milestone 19 Completion Basis
 

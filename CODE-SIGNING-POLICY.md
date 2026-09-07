@@ -2,6 +2,16 @@
 
 ## Status
 
+Alpha 2 may publish the exact owner-approved Windows and Apple Silicon archives
+after final evidence verification and required review. Signing alone does not
+publish a release. The final evidence path is described in
+[Release Guidance](docs/release.md#alpha-2-final-publication).
+
+### Historical status before Alpha 2 publication
+
+The following records the earlier unsigned-only distribution stage, not a ban
+on the separately approved Alpha 2 release:
+
 Haven 42 does not currently publish or distribute code-signed binaries.
 Current public portable packages are unsigned development artifacts. A
 Microsoft Artifact Signing account, Public Trust certificate profile, and
@@ -39,7 +49,7 @@ commit. Product name, product version, file version, original filename, and
 description metadata must match the release manifest and be enforced by the
 signing artifact configuration.
 
-The following are not eligible under this policy:
+The following are not eligible under the Windows launcher-only authorization:
 
 - pull-request artifacts;
 - dirty, local-only, branch-tip, or moving-reference builds;
@@ -54,7 +64,37 @@ The following are not eligible under this policy:
 
 Unsigned upstream open-source libraries may be packaged only when their
 license and notices are reviewed. They must not be signed with Haven 42's
-project authorization.
+Windows launcher-only authorization.
+
+### Apple Silicon application signing
+
+For the separately owner-approved macOS artifact, Developer ID signing covers
+the application bundle and its nested executable code, including packaged Python
+and extension libraries that Apple requires to be signed. This platform-specific
+authorization does not apply to Windows upstream libraries, separately installed
+providers, models, drivers, installers or updaters. Preserve reviewed upstream
+licenses, notices, source provenance and the exact packaged-code inventory.
+
+Require the approved source commit, hardened runtime, notarization, stapling,
+Gatekeeper verification and final archive digest. Use the owner's existing Mac
+keychain without exporting its private key. Do not infer approval for another
+commit or artifact from a previous successful signature.
+
+### Final release authorization
+
+The final record must bind owner publication approval and every assessment to
+the source commit and complete three-platform archive digest set. Verify the
+actual archive bytes before publication, and recheck required hosted CI on the
+reviewed release-control revision. Evidence hashes protect records from drift;
+they do not authenticate a reviewer or independently prove that a test ran.
+Review their contents and provenance before accepting them.
+
+Only the owner's explicit Alpha 2 deferral of remaining manual accessibility
+assessment may be recorded as deferred-not-run. It is not a passing assessment
+and cannot waive a known regression, privacy finding, failed signature, or
+missing required native validation. Do not alter the frozen signed artifacts
+to update release documentation. Candidate-stage markers and historic records
+remain evidence of their build stage; final release authorization is separate.
 
 ## Build And Approval Requirements
 

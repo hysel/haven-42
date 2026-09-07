@@ -1,0 +1,165 @@
+{
+  "schemaVersion": 1,
+  "kind": "haven42-alpha2-final-release-evidence",
+  "version": "0.4.0-alpha.2",
+  "sourceCommit": "44aa95e193bf9f021230304124747683c570d704",
+  "prerelease": true,
+  "productionReady": false,
+  "artifacts": {
+    "windows-x64": {
+      "name": "haven42-0.4.0-alpha.2-windows-x64-signed.zip",
+      "sha256": "4764662ddee3ed7d3ae9348f8202482f6257abb7044f01624a6ae3752ff3a516",
+      "sizeBytes": 10578459,
+      "sourceCommit": "44aa95e193bf9f021230304124747683c570d704",
+      "trust": {
+        "authenticode": true,
+        "expected-publisher": true,
+        "trusted-timestamp": true
+      },
+      "evidence": {
+        "path": "config/alpha-2-final-artifact-review.json",
+        "sha256": "bc711db080a024f216788b032d617d830edb5d22a0ba0d087dd25c71ca232818"
+      }
+    },
+    "linux-x64": {
+      "name": "haven42-0.4.0-alpha.2-linux-x64-unsigned.tar.gz",
+      "sha256": "9c596ca438ea6c212aee7dac84e6a18ea48d1f7be9d47d9a8a5985dc2d995248",
+      "sizeBytes": 26530353,
+      "sourceCommit": "44aa95e193bf9f021230304124747683c570d704",
+      "trust": {},
+      "evidence": {
+        "path": "config/alpha-2-final-artifact-review.json",
+        "sha256": "bc711db080a024f216788b032d617d830edb5d22a0ba0d087dd25c71ca232818"
+      }
+    },
+    "macos-arm64": {
+      "name": "haven42-0.4.0-alpha.2-macos-arm64-signed-notarized.zip",
+      "sha256": "5892ea6285c00ebfd4a4c4a467542cd949512cf5c2a02025dd645685ac3c295a",
+      "sizeBytes": 10959507,
+      "sourceCommit": "44aa95e193bf9f021230304124747683c570d704",
+      "trust": {
+        "developer-id": true,
+        "hardened-runtime": true,
+        "notarization": true,
+        "stapling": true,
+        "gatekeeper": true
+      },
+      "evidence": {
+        "path": "config/alpha-2-final-artifact-review.json",
+        "sha256": "bc711db080a024f216788b032d617d830edb5d22a0ba0d087dd25c71ca232818"
+      }
+    }
+  },
+  "checks": {
+    "exact-source-ci": {
+      "status": "passed",
+      "sourceCommit": "44aa95e193bf9f021230304124747683c570d704",
+      "artifactSha256": {
+        "windows-x64": "4764662ddee3ed7d3ae9348f8202482f6257abb7044f01624a6ae3752ff3a516",
+        "linux-x64": "9c596ca438ea6c212aee7dac84e6a18ea48d1f7be9d47d9a8a5985dc2d995248",
+        "macos-arm64": "5892ea6285c00ebfd4a4c4a467542cd949512cf5c2a02025dd645685ac3c295a"
+      },
+      "evidence": {
+        "path": "config/alpha-2-final-artifact-review.json",
+        "sha256": "bc711db080a024f216788b032d617d830edb5d22a0ba0d087dd25c71ca232818"
+      }
+    },
+    "security-privacy-review": {
+      "status": "not-run",
+      "sourceCommit": "44aa95e193bf9f021230304124747683c570d704",
+      "artifactSha256": {
+        "windows-x64": "4764662ddee3ed7d3ae9348f8202482f6257abb7044f01624a6ae3752ff3a516",
+        "linux-x64": "9c596ca438ea6c212aee7dac84e6a18ea48d1f7be9d47d9a8a5985dc2d995248",
+        "macos-arm64": "5892ea6285c00ebfd4a4c4a467542cd949512cf5c2a02025dd645685ac3c295a"
+      },
+      "evidence": null
+    },
+    "supply-chain-review": {
+      "status": "not-run",
+      "sourceCommit": "44aa95e193bf9f021230304124747683c570d704",
+      "artifactSha256": {
+        "windows-x64": "4764662ddee3ed7d3ae9348f8202482f6257abb7044f01624a6ae3752ff3a516",
+        "linux-x64": "9c596ca438ea6c212aee7dac84e6a18ea48d1f7be9d47d9a8a5985dc2d995248",
+        "macos-arm64": "5892ea6285c00ebfd4a4c4a467542cd949512cf5c2a02025dd645685ac3c295a"
+      },
+      "evidence": null
+    },
+    "release-documentation": {
+      "status": "not-run",
+      "sourceCommit": "44aa95e193bf9f021230304124747683c570d704",
+      "artifactSha256": {
+        "windows-x64": "4764662ddee3ed7d3ae9348f8202482f6257abb7044f01624a6ae3752ff3a516",
+        "linux-x64": "9c596ca438ea6c212aee7dac84e6a18ea48d1f7be9d47d9a8a5985dc2d995248",
+        "macos-arm64": "5892ea6285c00ebfd4a4c4a467542cd949512cf5c2a02025dd645685ac3c295a"
+      },
+      "evidence": null
+    },
+    "windows-11-x64-nvidia": {
+      "status": "not-run",
+      "sourceCommit": "44aa95e193bf9f021230304124747683c570d704",
+      "artifactSha256": {
+        "windows-x64": "4764662ddee3ed7d3ae9348f8202482f6257abb7044f01624a6ae3752ff3a516",
+        "linux-x64": "9c596ca438ea6c212aee7dac84e6a18ea48d1f7be9d47d9a8a5985dc2d995248",
+        "macos-arm64": "5892ea6285c00ebfd4a4c4a467542cd949512cf5c2a02025dd645685ac3c295a"
+      },
+      "evidence": null
+    },
+    "ubuntu-26.04-x64-nvidia": {
+      "status": "not-run",
+      "sourceCommit": "44aa95e193bf9f021230304124747683c570d704",
+      "artifactSha256": {
+        "windows-x64": "4764662ddee3ed7d3ae9348f8202482f6257abb7044f01624a6ae3752ff3a516",
+        "linux-x64": "9c596ca438ea6c212aee7dac84e6a18ea48d1f7be9d47d9a8a5985dc2d995248",
+        "macos-arm64": "5892ea6285c00ebfd4a4c4a467542cd949512cf5c2a02025dd645685ac3c295a"
+      },
+      "evidence": null
+    },
+    "bazzite-44-x64-nvidia": {
+      "status": "not-run",
+      "sourceCommit": "44aa95e193bf9f021230304124747683c570d704",
+      "artifactSha256": {
+        "windows-x64": "4764662ddee3ed7d3ae9348f8202482f6257abb7044f01624a6ae3752ff3a516",
+        "linux-x64": "9c596ca438ea6c212aee7dac84e6a18ea48d1f7be9d47d9a8a5985dc2d995248",
+        "macos-arm64": "5892ea6285c00ebfd4a4c4a467542cd949512cf5c2a02025dd645685ac3c295a"
+      },
+      "evidence": null
+    },
+    "macos-arm64": {
+      "status": "not-run",
+      "sourceCommit": "44aa95e193bf9f021230304124747683c570d704",
+      "artifactSha256": {
+        "windows-x64": "4764662ddee3ed7d3ae9348f8202482f6257abb7044f01624a6ae3752ff3a516",
+        "linux-x64": "9c596ca438ea6c212aee7dac84e6a18ea48d1f7be9d47d9a8a5985dc2d995248",
+        "macos-arm64": "5892ea6285c00ebfd4a4c4a467542cd949512cf5c2a02025dd645685ac3c295a"
+      },
+      "evidence": null
+    }
+  },
+  "manualAccessibility": {
+    "status": "deferred-not-run",
+    "sourceCommit": "44aa95e193bf9f021230304124747683c570d704",
+    "artifactSha256": {
+      "windows-x64": "4764662ddee3ed7d3ae9348f8202482f6257abb7044f01624a6ae3752ff3a516",
+      "linux-x64": "9c596ca438ea6c212aee7dac84e6a18ea48d1f7be9d47d9a8a5985dc2d995248",
+      "macos-arm64": "5892ea6285c00ebfd4a4c4a467542cd949512cf5c2a02025dd645685ac3c295a"
+    },
+    "ownerApprovedDeferral": true,
+    "evidence": {
+      "path": "config/alpha-2-final-artifact-review.json",
+      "sha256": "bc711db080a024f216788b032d617d830edb5d22a0ba0d087dd25c71ca232818"
+    }
+  },
+  "ownerApproval": {
+    "approved": true,
+    "sourceCommit": "44aa95e193bf9f021230304124747683c570d704",
+    "artifactSha256": {
+      "windows-x64": "4764662ddee3ed7d3ae9348f8202482f6257abb7044f01624a6ae3752ff3a516",
+      "linux-x64": "9c596ca438ea6c212aee7dac84e6a18ea48d1f7be9d47d9a8a5985dc2d995248",
+      "macos-arm64": "5892ea6285c00ebfd4a4c4a467542cd949512cf5c2a02025dd645685ac3c295a"
+    },
+    "evidence": {
+      "path": "config/alpha-2-final-artifact-review.json",
+      "sha256": "bc711db080a024f216788b032d617d830edb5d22a0ba0d087dd25c71ca232818"
+    }
+  }
+}
