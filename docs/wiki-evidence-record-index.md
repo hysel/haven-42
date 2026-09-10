@@ -115,7 +115,13 @@ them by hand; update the catalog and run the generator.
 | --- | --- | --- |
 | [Radeon RX 5700 XT exact Ubuntu Vulkan profile](https://github.com/hysel/haven-42/wiki/Evidence-Record-07a5bd4578f3108f) | `partial-pass` | Ubuntu 26.04 LTS · Ollama 0.32.13 Vulkan RADV · 16 exact manifest-pinned model profiles |
 | [Radeon RX 6800 non-XT exact Ubuntu Vulkan profile](https://github.com/hysel/haven-42/wiki/Evidence-Record-8863732197853ce7) | `partial-pass` | Ubuntu 26.04 LTS · Ollama 0.32.14 Vulkan RADV · digest-pinned-13-model-corpus |
+| [Ubuntu 26.04 NVIDIA GeForce RTX 5050 8 GB five-model inference qualification](https://github.com/hysel/haven-42/wiki/Evidence-Record-1319a87ecf24fbe1) | `partial-pass` | Ubuntu 26.04 · Ollama · digest-pinned-five-model-corpus |
+| [Ubuntu 26.04.1 NVIDIA GeForce RTX 4060 8 GB five-model inference qualification](https://github.com/hysel/haven-42/wiki/Evidence-Record-dc70fd5f30488511) | `partial-pass` | Ubuntu 26.04.1 · Ollama · digest-pinned-five-model-corpus |
+| [Ubuntu NVIDIA Quadro P4000 8 GB five-model inference qualification](https://github.com/hysel/haven-42/wiki/Evidence-Record-5aaf847e3a21acdc) | `partial-pass` | Ubuntu 26.04.1 · Ollama · digest-pinned-five-model-corpus |
+| [Windows 11 NVIDIA GeForce RTX 4060 8 GB five-model inference qualification](https://github.com/hysel/haven-42/wiki/Evidence-Record-f01af957577a27b2) | `partial-pass` | Windows 11 · Ollama · digest-pinned-five-model-corpus |
+| [Windows 11 NVIDIA GeForce RTX 5050 8 GB five-model inference qualification](https://github.com/hysel/haven-42/wiki/Evidence-Record-a46e1f9b4a85063d) | `partial-pass` | Windows 11 · Ollama · digest-pinned-five-model-corpus |
 | [Windows AMD Radeon RX 6800 16 GB nineteen-model qualification](https://github.com/hysel/haven-42/wiki/Evidence-Record-5ef05050d8cf0bc1) | `partial-pass` | Windows 11 · Ollama · digest-pinned-nineteen-model-corpus |
+| [Windows NVIDIA Quadro P4000 8 GB five-model inference qualification](https://github.com/hysel/haven-42/wiki/Evidence-Record-85491e34ba9e5076) | `partial-pass` | Windows 11 · Ollama · digest-pinned-five-model-corpus |
 ## Hardware Recommendation
 
 | Evidence | Status | Tested environment |

@@ -53,8 +53,8 @@
     },
     {
       "path": "config/evidence-catalog.tsv",
-      "sha256": "241a193a475cd4e7ef234c18445a09130d5b150a1528ce204cfc667b31f26957",
-      "sizeBytes": 100415
+      "sha256": "772e3601ba5a986db2da16dd64ce7c1196d02461efecf9ae07f8dd8d66f788f8",
+      "sizeBytes": 104136
     },
     {
       "path": "config/agent-surface-capabilities.json",

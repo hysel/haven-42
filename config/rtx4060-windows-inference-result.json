@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "kind": "haven42-rtx4060-bounded-inference-evidence",
+  "observedDate": "2026-09-08",
+  "platform": "windows",
+  "operatingSystem": "Windows 11 Pro 10.0.26200",
+  "accelerator": "NVIDIA GeForce RTX 4060 8 GB",
+  "driverVersion": "616.64",
+  "systemMemoryGiB": 127.913,
+  "runtime": "Ollama 0.32.14",
+  "backend": "CUDA",
+  "models": [
+    {
+      "modelId": "qwen35-9b-q4",
+      "manifestDigest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+      "status": "passed",
+      "coreSamplesPassed": 9,
+      "soakSamplesPassed": 126,
+      "elapsedSoakSeconds": 1806.73
+    },
+    {
+      "modelId": "qwen35-4b-q4",
+      "manifestDigest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+      "status": "passed",
+      "coreSamplesPassed": 9,
+      "soakSamplesPassed": 132,
+      "elapsedSoakSeconds": 1805.93
+    },
+    {
+      "modelId": "qwen35-2b-q8",
+      "manifestDigest": "324d162be6ca5629ae4517c8710434d0bd2d665bc94dbad46e9af8fbf8a2f0df",
+      "status": "passed",
+      "coreSamplesPassed": 9,
+      "soakSamplesPassed": 132,
+      "elapsedSoakSeconds": 1800
+    },
+    {
+      "modelId": "phi4-mini-38b-q4",
+      "manifestDigest": "78fad5d182a7c33065e153a5f8ba210754207ba9d91973f57dffa7f487363753",
+      "status": "passed",
+      "coreSamplesPassed": 9,
+      "soakSamplesPassed": 141,
+      "elapsedSoakSeconds": 1800
+    },
+    {
+      "modelId": "llama32-3b-q4",
+      "manifestDigest": "a80c4f17acd55265feec403c7aef86be0c25983ab279d83f3bcd3abbcb5b8b72",
+      "status": "passed",
+      "coreSamplesPassed": 9,
+      "soakSamplesPassed": 141,
+      "elapsedSoakSeconds": 1800
+    }
+  ],
+  "samplesPassed": 717,
+  "samplesFailed": 0,
+  "finalUnload": "verified",
+  "telemetry": {
+    "temperatureC": {
+      "samples": 244,
+      "unavailable": 0,
+      "minimum": 41,
+      "maximum": 66,
+      "arithmeticMean": 47.791
+    },
+    "powerW": {
+      "samples": 0,
+      "unavailable": 244,
+      "minimum": null,
+      "maximum": null,
+      "arithmeticMean": null
+    }
+  },
+  "telemetryMethod": "nvidia-smi checkpoints before three-response cells and model preflight; not sustained-load or time-weighted averages",
+  "powerScope": "GPU board only, not wall power; no energy estimate",
+  "sourceProvenance": {
+    "status.json": {
+      "sha256": "32d619d3c069eaec4cb786cf862bd69531523a1c2fc3d404f0a071b479359566",
+      "sizeBytes": 314202
+    },
+    "telemetry.jsonl": {
+      "sha256": "3de7730140494272b2d79142cec055f34423ec3ef1b865d3202a2b9c766a5d8a",
+      "sizeBytes": 31482
+    },
+    "rawHwinfo": {
+      "sha256": "2db7cbdcf59849bffab596c197c0a707582c8087447e3c284eab87533b8a4549",
+      "sizeBytes": 37394745
+    }
+  },
+  "codingAgent": "not-run",
+  "nativePackageReview": "not-run",
+  "automaticDefaultChangeAllowed": false,
+  "automaticSupportChangeAllowed": false
+}
