@@ -1,0 +1,166 @@
+{
+  "schemaVersion": 1,
+  "status": "exact-profile-inference-evidence-with-limitations",
+  "issues": [],
+  "gpu": "GeForce RTX 5050 8 GB",
+  "provider": "Ollama",
+  "runtimeVersion": "0.32.14",
+  "profiles": [
+    {
+      "platform": "Windows",
+      "driver": "616.64",
+      "models": [
+        {
+          "modelId": "qwen35-9b-q4",
+          "manifestDigest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+          "recordedLastSampleElapsedSeconds": 1783.88,
+          "reconstructedProbeIntervalSeconds": 1800.003349,
+          "timingNote": "Original elapsed field omitted final wait; interval reconstructed from preserved probes, not a recovered monotonic duration.",
+          "coreSamplesPassed": 9,
+          "coreUnloadProofs": 9,
+          "soakSamplesPassed": 126,
+          "soakUnloadProofs": 126
+        },
+        {
+          "modelId": "qwen35-4b-q4",
+          "manifestDigest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+          "soakSeconds": 1800,
+          "coreSamplesPassed": 9,
+          "coreUnloadProofs": 9,
+          "soakSamplesPassed": 132,
+          "soakUnloadProofs": 132
+        },
+        {
+          "modelId": "qwen35-2b-q8",
+          "manifestDigest": "324d162be6ca5629ae4517c8710434d0bd2d665bc94dbad46e9af8fbf8a2f0df",
+          "soakSeconds": 1800,
+          "coreSamplesPassed": 9,
+          "coreUnloadProofs": 9,
+          "soakSamplesPassed": 132,
+          "soakUnloadProofs": 132
+        },
+        {
+          "modelId": "phi4-mini-38b-q4",
+          "manifestDigest": "78fad5d182a7c33065e153a5f8ba210754207ba9d91973f57dffa7f487363753",
+          "soakSeconds": 1800,
+          "coreSamplesPassed": 9,
+          "coreUnloadProofs": 9,
+          "soakSamplesPassed": 141,
+          "soakUnloadProofs": 141
+        },
+        {
+          "modelId": "llama32-3b-q4",
+          "manifestDigest": "a80c4f17acd55265feec403c7aef86be0c25983ab279d83f3bcd3abbcb5b8b72",
+          "soakSeconds": 1800,
+          "coreSamplesPassed": 9,
+          "coreUnloadProofs": 9,
+          "soakSamplesPassed": 144,
+          "soakUnloadProofs": 144
+        }
+      ],
+      "coreSamplesPassed": 45,
+      "soakSamplesPassed": 675,
+      "finalUnload": "verified-resumed-controller-only",
+      "operatingSystem": "Windows 11 Pro 10.0.26200"
+    },
+    {
+      "platform": "Ubuntu",
+      "driver": "610.43.02",
+      "models": [
+        {
+          "modelId": "qwen35-9b-q4",
+          "manifestDigest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+          "soakSeconds": 1800,
+          "coreSamplesPassed": 9,
+          "coreUnloadProofs": 9,
+          "soakSamplesPassed": 132,
+          "soakUnloadProofs": 132
+        },
+        {
+          "modelId": "qwen35-4b-q4",
+          "manifestDigest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+          "soakSeconds": 1800,
+          "coreSamplesPassed": 9,
+          "coreUnloadProofs": 9,
+          "soakSamplesPassed": 135,
+          "soakUnloadProofs": 135
+        },
+        {
+          "modelId": "qwen35-2b-q8",
+          "manifestDigest": "324d162be6ca5629ae4517c8710434d0bd2d665bc94dbad46e9af8fbf8a2f0df",
+          "soakSeconds": 1800,
+          "coreSamplesPassed": 9,
+          "coreUnloadProofs": 9,
+          "soakSamplesPassed": 135,
+          "soakUnloadProofs": 135
+        },
+        {
+          "modelId": "phi4-mini-38b-q4",
+          "manifestDigest": "78fad5d182a7c33065e153a5f8ba210754207ba9d91973f57dffa7f487363753",
+          "soakSeconds": 1800,
+          "coreSamplesPassed": 9,
+          "coreUnloadProofs": 9,
+          "soakSamplesPassed": 147,
+          "soakUnloadProofs": 147
+        },
+        {
+          "modelId": "llama32-3b-q4",
+          "manifestDigest": "a80c4f17acd55265feec403c7aef86be0c25983ab279d83f3bcd3abbcb5b8b72",
+          "soakSeconds": 1800,
+          "coreSamplesPassed": 9,
+          "coreUnloadProofs": 9,
+          "soakSamplesPassed": 144,
+          "soakUnloadProofs": 144
+        }
+      ],
+      "coreSamplesPassed": 45,
+      "soakSamplesPassed": 693,
+      "finalUnload": "verified",
+      "operatingSystem": "Ubuntu 26.04 LTS, Linux 7.0.0-30-generic"
+    }
+  ],
+  "scope": "Bounded repeated inference/load/unload; not continuous thermal stress or coding-agent qualification.",
+  "codingAgent": "not-run",
+  "automaticPromotionAllowed": false,
+  "windowsFirstController": {
+    "status": "stopped",
+    "finalUnload": "unverified",
+    "note": "Stopped during the next model download; 9B per-sample unload proofs retained. Resumed run final cleanup is a separate record."
+  },
+  "ubuntuPackage": {
+    "integrityReadinessShutdown": "passed",
+    "managedSetup": "not-completed",
+    "packagedInference": "not-run"
+  },
+  "sourceProvenance": {
+    "windowsFirstResults": {
+      "sha256": "cf3d2d3dce871ce0402eeb4f29296132a210b6959ceb86fdbbb03f30a5cff113",
+      "bytes": 60490
+    },
+    "windowsResumedResults": {
+      "sha256": "e600f75293cd93855a0c93d8d00e1884e560ac711b3b7ac9bb71b2418e7551d7",
+      "bytes": 256947
+    },
+    "ubuntuResults": {
+      "sha256": "1239c9d528a59977416992004f06d5576a8b75924912d7e5481fa80f22b87a87",
+      "bytes": 315564
+    },
+    "windowsFirstProbeTiming": {
+      "sha256": "1afeff4b9acdb9497864ad16e1cb11fcf328b994f2b804ba2fe591f9f014aed5",
+      "bytes": 6101
+    },
+    "windowsTimingRunNotes": {
+      "sha256": "f2f6fe2ae3626851f960218c740962abd7c4b3c984f201e5b99fa514513d7f7e",
+      "bytes": 2699
+    },
+    "windowsHwinfoFinal": {
+      "sha256": "c9a4ecb3b5ea42a9003f18cc1918e205804b6f127ebf60923a6ed4db7b0700ad",
+      "bytes": 44148482
+    },
+    "ubuntuGpuTelemetry": {
+      "sha256": "3ccbf7679cb1607ef3c2a73b7568bacb8aebd9a5e84a2be93ef71bae75d32f45",
+      "bytes": 32136
+    }
+  },
+  "powerEvidence": "Raw telemetry retained privately; per-model windows and sensor semantics not yet publication-reviewed."
+}

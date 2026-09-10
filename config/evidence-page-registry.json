@@ -3,8 +3,8 @@
   "kind": "haven42-evidence-page-registry",
   "sourceCatalog": "config/evidence-catalog.tsv",
   "sourceContract": "config/capability-evidence-contract.json",
-  "catalogSha256": "241a193a475cd4e7ef234c18445a09130d5b150a1528ce204cfc667b31f26957",
-  "recordCount": 212,
+  "catalogSha256": "772e3601ba5a986db2da16dd64ce7c1196d02461efecf9ae07f8dd8d66f788f8",
+  "recordCount": 218,
   "futureAutomaticUpdateUse": {
     "mode": "advisory-evidence-input-only",
     "automaticUpdateActivationAuthorized": false,
@@ -1938,6 +1938,126 @@
       }
     },
     {
+      "id": "evidence-1319a87ecf24fbe1",
+      "claim": {
+        "schema_version": "2",
+        "area": "hardware-qualification",
+        "subject": "Ubuntu 26.04 NVIDIA GeForce RTX 5050 8 GB five-model inference qualification",
+        "surface": "Ollama CUDA",
+        "surface_version": "0.32.14",
+        "provider": "Ollama",
+        "os": "Ubuntu 26.04",
+        "model": "digest-pinned-five-model-corpus",
+        "operation": "core-task-gate-and-30-minute-repeated-load-soak",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/nvidia-rtx5050-model-qualification.md",
+        "notes": "Five exact artifacts passed 738 Chat, Writing, and Summarization responses with per-sample unload checks on driver 610.43.02. Windows combines original and resumed runs; the original 9B duration is wall-clock reconstructed and original final cleanup unverified. Ubuntu managed package setup did not complete. Coding-agent and interactive package gates are not-run; no automatic default or support change. Power limitations are explicit in the report."
+      },
+      "sourceEvidence": "examples/nvidia-rtx5050-model-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-1319a87ecf24fbe1.md",
+        "wikiPage": "Evidence-Record-1319a87ecf24fbe1.md",
+        "title": "Ubuntu 26.04 NVIDIA GeForce RTX 5050 8 GB five-model inference qualification"
+      }
+    },
+    {
+      "id": "evidence-dc70fd5f30488511",
+      "claim": {
+        "schema_version": "2",
+        "area": "hardware-qualification",
+        "subject": "Ubuntu 26.04.1 NVIDIA GeForce RTX 4060 8 GB five-model inference qualification",
+        "surface": "Ollama CUDA",
+        "surface_version": "0.32.14",
+        "provider": "Ollama",
+        "os": "Ubuntu 26.04.1",
+        "model": "digest-pinned-five-model-corpus",
+        "operation": "core-task-gate-and-30-minute-repeated-load-soak",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/nvidia-rtx4060-model-qualification.md",
+        "notes": "Five exact artifacts passed 717 Chat, Writing, and Summarization responses with per-sample unload checks on driver 610.57.04. Coding-agent and interactive package gates are not-run; no automatic default or support change. Power limitations are explicit in the report."
+      },
+      "sourceEvidence": "examples/nvidia-rtx4060-model-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-dc70fd5f30488511.md",
+        "wikiPage": "Evidence-Record-dc70fd5f30488511.md",
+        "title": "Ubuntu 26.04.1 NVIDIA GeForce RTX 4060 8 GB five-model inference qualification"
+      }
+    },
+    {
+      "id": "evidence-5aaf847e3a21acdc",
+      "claim": {
+        "schema_version": "2",
+        "area": "hardware-qualification",
+        "subject": "Ubuntu NVIDIA Quadro P4000 8 GB five-model inference qualification",
+        "surface": "Ollama CUDA",
+        "surface_version": "0.32.14",
+        "provider": "Ollama",
+        "os": "Ubuntu 26.04.1",
+        "model": "digest-pinned-five-model-corpus",
+        "operation": "core-task-gate-and-30-minute-repeated-load-soak",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/nvidia-p4000-model-qualification.md",
+        "notes": "Five exact artifacts passed 735 Chat, Writing, and Summarization responses with per-sample unload checks on driver 580.178.04. Coding-agent and interactive package gates are not-run; no automatic default or support change. Power limitations are explicit in the report."
+      },
+      "sourceEvidence": "examples/nvidia-p4000-model-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-5aaf847e3a21acdc.md",
+        "wikiPage": "Evidence-Record-5aaf847e3a21acdc.md",
+        "title": "Ubuntu NVIDIA Quadro P4000 8 GB five-model inference qualification"
+      }
+    },
+    {
+      "id": "evidence-f01af957577a27b2",
+      "claim": {
+        "schema_version": "2",
+        "area": "hardware-qualification",
+        "subject": "Windows 11 NVIDIA GeForce RTX 4060 8 GB five-model inference qualification",
+        "surface": "Ollama CUDA",
+        "surface_version": "0.32.14",
+        "provider": "Ollama",
+        "os": "Windows 11",
+        "model": "digest-pinned-five-model-corpus",
+        "operation": "core-task-gate-and-30-minute-repeated-load-soak",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/nvidia-rtx4060-model-qualification.md",
+        "notes": "Five exact artifacts passed 717 Chat, Writing, and Summarization responses with per-sample unload checks on driver 616.64. Coding-agent and interactive package gates are not-run; no automatic default or support change. Power limitations are explicit in the report."
+      },
+      "sourceEvidence": "examples/nvidia-rtx4060-model-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-f01af957577a27b2.md",
+        "wikiPage": "Evidence-Record-f01af957577a27b2.md",
+        "title": "Windows 11 NVIDIA GeForce RTX 4060 8 GB five-model inference qualification"
+      }
+    },
+    {
+      "id": "evidence-a46e1f9b4a85063d",
+      "claim": {
+        "schema_version": "2",
+        "area": "hardware-qualification",
+        "subject": "Windows 11 NVIDIA GeForce RTX 5050 8 GB five-model inference qualification",
+        "surface": "Ollama CUDA",
+        "surface_version": "0.32.14",
+        "provider": "Ollama",
+        "os": "Windows 11",
+        "model": "digest-pinned-five-model-corpus",
+        "operation": "core-task-gate-and-30-minute-repeated-load-soak",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/nvidia-rtx5050-model-qualification.md",
+        "notes": "Five exact artifacts passed 720 Chat, Writing, and Summarization responses with per-sample unload checks on driver 616.64. Windows combines original and resumed runs; the original 9B duration is wall-clock reconstructed and original final cleanup unverified. Ubuntu managed package setup did not complete. Coding-agent and interactive package gates are not-run; no automatic default or support change. Power limitations are explicit in the report."
+      },
+      "sourceEvidence": "examples/nvidia-rtx5050-model-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-a46e1f9b4a85063d.md",
+        "wikiPage": "Evidence-Record-a46e1f9b4a85063d.md",
+        "title": "Windows 11 NVIDIA GeForce RTX 5050 8 GB five-model inference qualification"
+      }
+    },
+    {
       "id": "evidence-5ef05050d8cf0bc1",
       "claim": {
         "schema_version": "2",
@@ -1959,6 +2079,30 @@
         "repositorySource": "docs/evidence-records/evidence-5ef05050d8cf0bc1.md",
         "wikiPage": "Evidence-Record-5ef05050d8cf0bc1.md",
         "title": "Windows AMD Radeon RX 6800 16 GB nineteen-model qualification"
+      }
+    },
+    {
+      "id": "evidence-85491e34ba9e5076",
+      "claim": {
+        "schema_version": "2",
+        "area": "hardware-qualification",
+        "subject": "Windows NVIDIA Quadro P4000 8 GB five-model inference qualification",
+        "surface": "Ollama CUDA",
+        "surface_version": "0.32.14",
+        "provider": "Ollama",
+        "os": "Windows 11",
+        "model": "digest-pinned-five-model-corpus",
+        "operation": "core-task-gate-and-30-minute-repeated-load-soak",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/nvidia-p4000-model-qualification.md",
+        "notes": "Five exact artifacts passed 699 Chat, Writing, and Summarization responses with per-sample unload checks on driver 582.78. Coding-agent and interactive package gates are not-run; no automatic default or support change. Power limitations are explicit in the report."
+      },
+      "sourceEvidence": "examples/nvidia-p4000-model-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-85491e34ba9e5076.md",
+        "wikiPage": "Evidence-Record-85491e34ba9e5076.md",
+        "title": "Windows NVIDIA Quadro P4000 8 GB five-model inference qualification"
       }
     },
     {

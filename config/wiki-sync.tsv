@@ -274,7 +274,13 @@ docs/evidence-records/evidence-e868714f9f8c5344.md	Evidence-Record-e868714f9f8c5
 docs/evidence-records/evidence-b91e58b8e387a4cc.md	Evidence-Record-b91e58b8e387a4cc.md	Qwen 3.5 9B writing constraint matrix
 docs/evidence-records/evidence-07a5bd4578f3108f.md	Evidence-Record-07a5bd4578f3108f.md	Radeon RX 5700 XT exact Ubuntu Vulkan profile
 docs/evidence-records/evidence-8863732197853ce7.md	Evidence-Record-8863732197853ce7.md	Radeon RX 6800 non-XT exact Ubuntu Vulkan profile
+docs/evidence-records/evidence-1319a87ecf24fbe1.md	Evidence-Record-1319a87ecf24fbe1.md	Ubuntu 26.04 NVIDIA GeForce RTX 5050 8 GB five-model inference qualification
+docs/evidence-records/evidence-dc70fd5f30488511.md	Evidence-Record-dc70fd5f30488511.md	Ubuntu 26.04.1 NVIDIA GeForce RTX 4060 8 GB five-model inference qualification
+docs/evidence-records/evidence-5aaf847e3a21acdc.md	Evidence-Record-5aaf847e3a21acdc.md	Ubuntu NVIDIA Quadro P4000 8 GB five-model inference qualification
+docs/evidence-records/evidence-f01af957577a27b2.md	Evidence-Record-f01af957577a27b2.md	Windows 11 NVIDIA GeForce RTX 4060 8 GB five-model inference qualification
+docs/evidence-records/evidence-a46e1f9b4a85063d.md	Evidence-Record-a46e1f9b4a85063d.md	Windows 11 NVIDIA GeForce RTX 5050 8 GB five-model inference qualification
 docs/evidence-records/evidence-5ef05050d8cf0bc1.md	Evidence-Record-5ef05050d8cf0bc1.md	Windows AMD Radeon RX 6800 16 GB nineteen-model qualification
+docs/evidence-records/evidence-85491e34ba9e5076.md	Evidence-Record-85491e34ba9e5076.md	Windows NVIDIA Quadro P4000 8 GB five-model inference qualification
 docs/evidence-records/evidence-7c544083b952b24c.md	Evidence-Record-7c544083b952b24c.md	Script-level recommendation and config generation
 docs/evidence-records/evidence-27f4eaa91d0b896d.md	Evidence-Record-27f4eaa91d0b896d.md	Radeon RX 5700 XT current-boot host stability
 docs/evidence-records/evidence-e3d838e6e2d03596.md	Evidence-Record-e3d838e6e2d03596.md	Apple M4 16 GB MLX-LM lifecycle

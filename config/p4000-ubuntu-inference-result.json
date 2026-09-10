@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "kind": "haven42-p4000-bounded-inference-evidence",
+  "observedDate": "2026-09-09",
+  "platform": "ubuntu",
+  "operatingSystem": "Ubuntu 26.04.1 LTS, Linux 7.0.0-31-generic",
+  "accelerator": "NVIDIA Quadro P4000 8 GB",
+  "driverVersion": "580.178.04",
+  "systemMemoryGiB": 121.45,
+  "runtime": "Ollama 0.32.14",
+  "backend": "CUDA",
+  "models": [
+    {
+      "modelId": "qwen35-9b-q4",
+      "manifestDigest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+      "status": "passed",
+      "coreSamplesPassed": 9,
+      "soakSamplesPassed": 129,
+      "elapsedSoakSeconds": 1800.0
+    },
+    {
+      "modelId": "qwen35-4b-q4",
+      "manifestDigest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+      "status": "passed",
+      "coreSamplesPassed": 9,
+      "soakSamplesPassed": 135,
+      "elapsedSoakSeconds": 1804.84
+    },
+    {
+      "modelId": "qwen35-2b-q8",
+      "manifestDigest": "324d162be6ca5629ae4517c8710434d0bd2d665bc94dbad46e9af8fbf8a2f0df",
+      "status": "passed",
+      "coreSamplesPassed": 9,
+      "soakSamplesPassed": 135,
+      "elapsedSoakSeconds": 1800.0
+    },
+    {
+      "modelId": "phi4-mini-38b-q4",
+      "manifestDigest": "78fad5d182a7c33065e153a5f8ba210754207ba9d91973f57dffa7f487363753",
+      "status": "passed",
+      "coreSamplesPassed": 9,
+      "soakSamplesPassed": 147,
+      "elapsedSoakSeconds": 1800.16
+    },
+    {
+      "modelId": "llama32-3b-q4",
+      "manifestDigest": "a80c4f17acd55265feec403c7aef86be0c25983ab279d83f3bcd3abbcb5b8b72",
+      "status": "passed",
+      "coreSamplesPassed": 9,
+      "soakSamplesPassed": 144,
+      "elapsedSoakSeconds": 1800.0
+    }
+  ],
+  "samplesPassed": 735,
+  "samplesFailed": 0,
+  "finalUnload": "verified",
+  "telemetry": {
+    "temperatureC": {
+      "samples": 250,
+      "unavailable": 0,
+      "minimum": 41.0,
+      "maximum": 57.0,
+      "arithmeticMean": 49.276
+    },
+    "powerW": {
+      "samples": 250,
+      "unavailable": 0,
+      "minimum": 5.93,
+      "maximum": 42.4,
+      "arithmeticMean": 16.185
+    }
+  },
+  "telemetryMethod": "nvidia-smi checkpoints before three-response cells and model preflight; not sustained-load or time-weighted averages",
+  "powerScope": "GPU board only, not wall power; no energy estimate",
+  "sourceProvenance": {
+    "status.json": {
+      "sha256": "9ca7891c11bba96e035414532e0be21ca310e5fb7d3e7e078651bbc26304560e",
+      "sizeBytes": 311325
+    },
+    "telemetry.jsonl": {
+      "sha256": "a9dcb2c0dbc25bb09778f238553ce4995572b72c02ea1031fb8e9aee59771add",
+      "sizeBytes": 31849
+    }
+  },
+  "codingAgent": "not-run",
+  "nativePackageReview": "not-run",
+  "automaticDefaultChangeAllowed": false,
+  "automaticSupportChangeAllowed": false
+}
